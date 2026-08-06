@@ -6,3 +6,6 @@ data object Launcher
 
 @Serializable
 data object Home
+
+@Serializable
+data object Login

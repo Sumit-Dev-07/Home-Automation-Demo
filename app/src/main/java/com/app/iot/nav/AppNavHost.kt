@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.app.iot.ui.features.auth.screen.LoginScreen
 import com.app.iot.ui.features.common.screen.LauncherScreen
 import com.app.iot.ui.features.home.screen.HomeScreen
 
@@ -21,11 +22,33 @@ fun AppNavHost() {
 
             LauncherScreen(
                 onNavigateToMain = {
-                    navController.navigate(Home) {
+                    navController.navigate(Login) {
                         popUpTo<Launcher> {
                             inclusive = true
                         }
                     }
+                }
+            )
+        }
+
+        composable<Login>(
+            exitTransition = NavAnimations.exit(),
+            popEnterTransition = NavAnimations.popEnter(),
+            popExitTransition = NavAnimations.popExit()
+        ) {
+
+            LoginScreen(
+
+                navigateToHome = {
+                    navController.navigate(Home){
+                        popUpTo<Login> {
+                            inclusive = true
+                        }
+                    }
+                },
+
+                navigateToOtpScreen = { mobile ->
+
                 }
             )
         }
