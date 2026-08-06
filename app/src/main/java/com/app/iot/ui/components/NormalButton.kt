@@ -21,12 +21,14 @@ import androidx.compose.ui.unit.dp
 fun NormalButton(
     modifier: Modifier = Modifier,
     text: String,
+    enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     Button(
         modifier = modifier
             .height(50.dp),
-        onClick = onClick
+        onClick = onClick,
+        enabled = enabled
     ) {
         Text(text = text, style = MaterialTheme.typography.titleMedium)
     }

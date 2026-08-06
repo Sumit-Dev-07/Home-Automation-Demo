@@ -7,28 +7,41 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.app.iot.ui.components.CommonTopAppBar
 import com.app.iot.ui.components.MobileNumberTextField
 import com.app.iot.ui.components.NormalButton
 import com.app.iot.ui.components.PasswordTextField
+import com.app.iot.ui.features.auth.state.LoginUiEvent
 import com.app.iot.ui.features.auth.viewmodel.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     navigateToHome: () -> Unit,
-    viewModel: LoginViewModel = viewModel()
+    loginViewModel: LoginViewModel = viewModel()
 ) {
 
-    val mobileNumber = viewModel.mobileNumber
-    val password = viewModel.password
+    val loginState by remember {
+        loginViewModel.loginState
+    }
+
+    LaunchedEffect(key1 = loginState.isLoginSuccessful) {
+        if (loginState.isLoginSuccessful) {
+            navigateToHome()
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -48,18 +61,34 @@ fun LoginScreen(
         ) {
             MobileNumberTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = mobileNumber,
-                onValueChange = { viewModel.onMobileNumberChange(it) },
-                label = "Mobile Number"
+                value = loginState.emailOrMobile,
+                onValueChange = { inputString ->
+                    loginViewModel.onUiEvent(
+                        loginUiEvent = LoginUiEvent.EmailOrMobileChanged(
+                            inputString
+                        )
+                    )
+                },
+                label = "Mobile Number",
+                isError = loginState.errorState.emailOrMobileErrorState.hasError,
+                errorText = stringResource(id = loginState.errorState.emailOrMobileErrorState.errorMessageStringResource)
             )
 
             Spacer(Modifier.height(16.dp))
 
             PasswordTextField(
                 modifier = Modifier.fillMaxWidth(),
-                value = password,
-                onValueChange = { viewModel.onPasswordChange(it) },
-                label = "Password"
+                value = loginState.password,
+                onValueChange = { inputString ->
+                    loginViewModel.onUiEvent(
+                        loginUiEvent = LoginUiEvent.PasswordChanged(
+                            inputString
+                        )
+                    )
+                },
+                label = "Password",
+                isError = loginState.errorState.passwordErrorState.hasError,
+                errorText = stringResource(id = loginState.errorState.passwordErrorState.errorMessageStringResource)
             )
 
             Spacer(Modifier.height(24.dp))
@@ -67,8 +96,14 @@ fun LoginScreen(
             NormalButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = "Login",
-                onClick = { navigateToHome() }
+                enabled = !loginState.isLoading,
+                onClick = { loginViewModel.onUiEvent(loginUiEvent = LoginUiEvent.Submit) }
             )
+
+            if (loginState.isLoading) {
+                Spacer(Modifier.height(16.dp))
+                CircularProgressIndicator()
+            }
         }
     }
 }
