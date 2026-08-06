@@ -1,31 +1,24 @@
 package com.app.iot.ui.features.auth.screen
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.app.iot.ui.features.auth.viewmodel.LoginViewModel
 import com.app.iot.ui.components.CommonTopAppBar
+import com.app.iot.ui.components.MobileNumberTextField
+import com.app.iot.ui.components.NormalButton
+import com.app.iot.ui.components.PasswordTextField
+import com.app.iot.ui.features.auth.viewmodel.LoginViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +28,7 @@ fun LoginScreen(
 ) {
 
     val mobileNumber = viewModel.mobileNumber
+    val password = viewModel.password
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -47,47 +41,34 @@ fun LoginScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding),
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            BasicTextField(
+            MobileNumberTextField(
+                modifier = Modifier.fillMaxWidth(),
                 value = mobileNumber,
                 onValueChange = { viewModel.onMobileNumberChange(it) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .border(
-                        1.dp,
-                        Color.Gray,
-                        RoundedCornerShape(8.dp)
-                    )
-                    .padding(12.dp),
-                singleLine = true,
-                textStyle = LocalTextStyle.current.copy(
-                    color = Color.Black
-                ),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Number
-                ),
-                decorationBox = { innerTextField ->
-                    Box(
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        if (mobileNumber.isEmpty()) {
-                            Text(
-                                text = "Enter mobile number",
-                                color = Color.Gray
-                            )
-                        }
-                        innerTextField()
-                    }
-                }
+                label = "Mobile Number"
             )
+
             Spacer(Modifier.height(16.dp))
-            Button(onClick = { navigateToHome() }) {
-                Text("Login")
-            }
+
+            PasswordTextField(
+                modifier = Modifier.fillMaxWidth(),
+                value = password,
+                onValueChange = { viewModel.onPasswordChange(it) },
+                label = "Password"
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            NormalButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = "Login",
+                onClick = { navigateToHome() }
+            )
         }
     }
 }

@@ -64,6 +64,7 @@ androidx-compose-foundation-layout = { group = "androidx.compose.foundation", na
 # Compose Navigation
 androidx-navigation-compose = {module = "androidx.navigation:navigation-compose" , version.ref = "composeNavigation"}
 kotlinx-serialization-json = {module = "org.jetbrains.kotlinx:kotlinx-serialization-json" , version.ref = "serialization"}
+androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 
 
 [plugins]
