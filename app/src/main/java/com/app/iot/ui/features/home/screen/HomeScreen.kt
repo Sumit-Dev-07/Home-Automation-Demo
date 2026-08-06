@@ -1,24 +1,32 @@
 package com.app.iot.ui.features.home.screen
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
+import com.app.iot.custom_bottom_navigation.CustomBottomNavigation
 
 @Composable
 fun HomeScreen() {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Text(
-            text = "Home Screen",
-            textAlign = TextAlign.Center
-        )
+    var selectedItem by remember { mutableIntStateOf(0) }
+    Scaffold(
+        containerColor = Color(0xFFF18673),
+        bottomBar = {
+            CustomBottomNavigation(
+                selectedItem = selectedItem,
+                onItemSelected = { selectedItem = it }
+            )
+        }
+    ) { innerPadding ->
+        when (selectedItem) {
+            0 -> BaseContent("Home", innerPadding)
+            1 -> BaseContent("Search", innerPadding)
+            2 -> BaseContent("Cart", innerPadding)
+            3 -> BaseContent("Favorite", innerPadding)
+            4 -> BaseContent("Profile", innerPadding)
+        }
     }
 }
