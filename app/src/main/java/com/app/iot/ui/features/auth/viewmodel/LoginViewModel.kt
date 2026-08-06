@@ -1,4 +1,4 @@
-package com.app.chapter_one.ui.features.auth.viewmodel
+package com.app.iot.ui.features.auth.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

@@ -17,9 +17,8 @@ fun AppNavHost() {
         navController = navController,
         startDestination = Launcher
     ) {
-
+        // Launcher
         composable<Launcher> {
-
             LauncherScreen(
                 onNavigateToMain = {
                     navController.navigate(Login) {
@@ -31,14 +30,13 @@ fun AppNavHost() {
             )
         }
 
+        // Login
         composable<Login>(
             exitTransition = NavAnimations.exit(),
             popEnterTransition = NavAnimations.popEnter(),
             popExitTransition = NavAnimations.popExit()
         ) {
-
             LoginScreen(
-
                 navigateToHome = {
                     navController.navigate(Home){
                         popUpTo<Login> {
@@ -46,13 +44,10 @@ fun AppNavHost() {
                         }
                     }
                 },
-
-                navigateToOtpScreen = { mobile ->
-
-                }
             )
         }
 
+        // Home
         composable<Home>(
             enterTransition = NavAnimations.enter(),
             exitTransition = NavAnimations.fadeOutOnly(),
