@@ -10,10 +10,13 @@ import android.net.wifi.WifiManager
 import java.util.Locale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lightbulb
@@ -23,6 +26,7 @@ import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -54,6 +58,7 @@ fun HomeTab(
     
     val ledState by viewModel.ledState.collectAsState()
     val statusState by viewModel.statusState.collectAsState()
+    val scanState by viewModel.scanState.collectAsState()
 
     fun updateIpAddress() {
         val wifiMan = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -124,7 +129,9 @@ fun HomeTab(
                 isConnected = isAppWifiConnected, 
                 ipAddress = systemIpAddress,
                 isRefreshing = statusState is com.app.iot.util.UiState.Loading,
-                onEditIp = { showIpDialog = true }
+                onEditIp = { showIpDialog = true },
+                onFindDevices = { viewModel.findEspDevices(systemIpAddress) },
+                onRefresh = { updateIpAddress() }
             )
             Spacer(modifier = Modifier.height(24.dp))
             LazyVerticalGrid(
@@ -179,7 +186,70 @@ fun HomeTab(
                 }
             )
         }
+
+        if (scanState is com.app.iot.util.UiState.Loading || scanState is com.app.iot.util.UiState.Success || scanState is com.app.iot.util.UiState.Error) {
+            DiscoveryDialog(
+                state = scanState,
+                onDismiss = { viewModel.resetScanState() },
+                onSelectIp = { newIp ->
+                    systemIpAddress = newIp
+                    ApiPath.LOCAL_WIFI_IP_URL = newIp
+                    viewModel.resetScanState()
+                }
+            )
+        }
     }
+}
+
+@Composable
+fun DiscoveryDialog(
+    state: com.app.iot.util.UiState<List<String>>,
+    onDismiss: () -> Unit,
+    onSelectIp: (String) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Scanning Network", fontFamily = OnestBold) },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 300.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                when (state) {
+                    is com.app.iot.util.UiState.Loading -> {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Searching for ESP devices...")
+                    }
+                    is com.app.iot.util.UiState.Success -> {
+                        LazyColumn {
+                            items(state.data) { ip ->
+                                ListItem(
+                                    headlineContent = { Text(ip) },
+                                    leadingContent = { Icon(Icons.Default.Wifi, contentDescription = null) },
+                                    modifier = Modifier.clickable { 
+                                        onSelectIp(ip)
+                                        onDismiss()
+                                    }
+                                )
+                            }
+                        }
+                    }
+                    is com.app.iot.util.UiState.Error -> {
+                        Text(state.message, color = Color.Red)
+                    }
+                    else -> {}
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
 }
 
 @Composable
@@ -228,7 +298,9 @@ fun WifiStatusHeader(
     isConnected: Boolean, 
     ipAddress: String, 
     isRefreshing: Boolean,
-    onEditIp: () -> Unit
+    onEditIp: () -> Unit,
+    onFindDevices: () -> Unit,
+    onRefresh: () -> Unit
 ) {
     val outerCornerRadius = 24.dp
     val innerCornerRadius = 20.dp
@@ -285,9 +357,18 @@ fun WifiStatusHeader(
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
+                if (isConnected) {
+                    IconButton(onClick = onFindDevices) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Find Devices",
+                            tint = Color(0xFFE64A19)
+                        )
+                    }
+                }
                 if (!isConnected) {
                     TextButton(
-                        onClick = { /* Refresh WiFi status */ },
+                        onClick = onRefresh,
                         contentPadding = PaddingValues(horizontal = 8.dp)
                     ) {
                         Text(
