@@ -21,7 +21,7 @@ fun AppNavHost() {
         composable<Launcher> {
             LauncherScreen(
                 onNavigateToMain = {
-                    navController.navigate(Login) {
+                    navController.navigate(Home) {
                         popUpTo<Launcher> {
                             inclusive = true
                         }
@@ -37,7 +37,7 @@ fun AppNavHost() {
             popExitTransition = NavAnimations.popExit()
         ) {
             LoginScreen(
-                navigateToHome = {
+                onLoginSuccess = {
                     navController.navigate(Home){
                         popUpTo<Login> {
                             inclusive = true
@@ -49,9 +49,9 @@ fun AppNavHost() {
 
         // Home
         composable<Home>(
-            enterTransition = NavAnimations.enter(),
+            /*enterTransition = NavAnimations.enter(),
             exitTransition = NavAnimations.fadeOutOnly(),
-            popExitTransition = NavAnimations.popExit()
+            popExitTransition = NavAnimations.popExit()*/
         ) {
             HomeScreen()
         }

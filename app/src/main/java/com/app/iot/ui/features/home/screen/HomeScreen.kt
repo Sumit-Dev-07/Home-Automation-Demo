@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import com.app.iot.custom_bottom_navigation.CustomBottomNavigation
+import com.app.iot.ui.features.home.tab.HomeTab
 
 @Composable
 fun HomeScreen() {
@@ -22,7 +23,7 @@ fun HomeScreen() {
         }
     ) { innerPadding ->
         when (selectedItem) {
-            0 -> BaseContent("Home", innerPadding)
+            0 -> HomeTab(innerPadding)
             1 -> BaseContent("Search", innerPadding)
             2 -> BaseContent("Cart", innerPadding)
             3 -> BaseContent("Favorite", innerPadding)
