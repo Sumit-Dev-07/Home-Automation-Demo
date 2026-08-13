@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -49,8 +50,10 @@ fun HomeTab(
     val snackbarHostState = remember { SnackbarHostState() }
     var isAppWifiConnected by remember { mutableStateOf(false) }
     var systemIpAddress by remember { mutableStateOf("0.0.0.0") }
+    var showIpDialog by remember { mutableStateOf(false) }
     
     val ledState by viewModel.ledState.collectAsState()
+    val statusState by viewModel.statusState.collectAsState()
 
     fun updateIpAddress() {
         val wifiMan = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -117,7 +120,12 @@ fun HomeTab(
                 .padding(16.dp)
         ) {
             // App WiFi Status
-            WifiStatusHeader(isConnected = isAppWifiConnected, ipAddress = systemIpAddress)
+            WifiStatusHeader(
+                isConnected = isAppWifiConnected, 
+                ipAddress = systemIpAddress,
+                isRefreshing = statusState is com.app.iot.util.UiState.Loading,
+                onEditIp = { showIpDialog = true }
+            )
             Spacer(modifier = Modifier.height(24.dp))
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
@@ -152,11 +160,76 @@ fun HomeTab(
                 snackbarHostState.showSnackbar((ledState as com.app.iot.util.UiState.Error).message)
             }
         }
+
+        // Fetch status when IP is available
+        LaunchedEffect(systemIpAddress) {
+            if (systemIpAddress != "0.0.0.0" && isAppWifiConnected) {
+                viewModel.fetchStatus(systemIpAddress)
+            }
+        }
+
+        if (showIpDialog) {
+            ManualIpDialog(
+                currentIp = systemIpAddress,
+                onDismiss = { showIpDialog = false },
+                onConfirm = { newIp ->
+                    systemIpAddress = newIp
+                    ApiPath.LOCAL_WIFI_IP_URL = newIp
+                    showIpDialog = false
+                }
+            )
+        }
     }
 }
 
 @Composable
-fun WifiStatusHeader(isConnected: Boolean, ipAddress: String) {
+fun ManualIpDialog(
+    currentIp: String,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var text by remember { mutableStateOf(currentIp) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Change IP Address", fontFamily = OnestBold) },
+        text = {
+            Column {
+                Text(text = "Enter the IP address of your IoT device:", fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    placeholder = { Text("192.168.x.x") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    )
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = { onConfirm(text) }) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+fun WifiStatusHeader(
+    isConnected: Boolean, 
+    ipAddress: String, 
+    isRefreshing: Boolean,
+    onEditIp: () -> Unit
+) {
     val outerCornerRadius = 24.dp
     val innerCornerRadius = 20.dp
     val gap = 6.dp
@@ -178,12 +251,20 @@ fun WifiStatusHeader(isConnected: Boolean, ipAddress: String) {
                 modifier = Modifier.padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = if (isConnected) Icons.Default.Wifi else Icons.Default.WifiOff,
-                    contentDescription = null,
-                    tint = if (isConnected) Color(0xFF4CAF50) else Color(0xFFF44336),
-                    modifier = Modifier.size(24.dp)
-                )
+                if (isRefreshing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        strokeWidth = 2.dp,
+                        color = Color(0xFF4CAF50)
+                    )
+                } else {
+                    Icon(
+                        imageVector = if (isConnected) Icons.Default.Wifi else Icons.Default.WifiOff,
+                        contentDescription = null,
+                        tint = if (isConnected) Color(0xFF4CAF50) else Color(0xFFF44336),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
@@ -193,12 +274,14 @@ fun WifiStatusHeader(isConnected: Boolean, ipAddress: String) {
                         color = if (isConnected) Color(0xFF2E7D32) else Color(0xFFC62828)
                     )
                     if (isConnected) {
-                        Text(
-                            text = "IP: $ipAddress",
-                            fontFamily = OnestRegular,
-                            fontSize = 11.sp,
-                            color = Color.Gray
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "IP: $ipAddress",
+                                fontFamily = OnestRegular,
+                                fontSize = 11.sp,
+                                color = Color.Gray
+                            )
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
@@ -209,6 +292,18 @@ fun WifiStatusHeader(isConnected: Boolean, ipAddress: String) {
                     ) {
                         Text(
                             text = "Connect",
+                            fontFamily = OnestSemiBold,
+                            fontSize = 12.sp,
+                            color = Color(0xFFC62828)
+                        )
+                    }
+                } else {
+                    TextButton(
+                        onClick = onEditIp,
+                        contentPadding = PaddingValues(horizontal = 8.dp)
+                    ) {
+                        Text(
+                            text = "Edit",
                             fontFamily = OnestSemiBold,
                             fontSize = 12.sp,
                             color = Color(0xFFC62828)

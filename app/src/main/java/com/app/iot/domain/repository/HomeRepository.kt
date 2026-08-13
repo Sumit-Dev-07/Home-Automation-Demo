@@ -7,4 +7,5 @@ import okhttp3.ResponseBody
 interface HomeRepository {
     suspend fun ledOn(ipAddress: String): Flow<ApiState<ResponseBody>>
     suspend fun ledOff(ipAddress: String): Flow<ApiState<ResponseBody>>
+    suspend fun getStatus(ipAddress: String): Flow<ApiState<ResponseBody>>
 }

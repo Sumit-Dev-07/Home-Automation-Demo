@@ -13,4 +13,8 @@ class HomeDataSourceImpl @Inject constructor(private val apiService: ApiService)
     override suspend fun ledOff(ipAddress: String): Response<ResponseBody> {
         return apiService.controlLed("http://$ipAddress/ledoff")
     }
+
+    override suspend fun getStatus(ipAddress: String): Response<ResponseBody> {
+        return apiService.controlLed("http://$ipAddress/status")
+    }
 }

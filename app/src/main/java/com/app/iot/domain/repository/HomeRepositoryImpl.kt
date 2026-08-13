@@ -27,4 +27,11 @@ class HomeRepositoryImpl @Inject constructor(
             emit(result)
         }.flowOn(dispatchersProvider.io())
     }
+
+    override suspend fun getStatus(ipAddress: String): Flow<ApiState<ResponseBody>> {
+        return flow {
+            val result = safeApiCall { homeDataSource.getStatus(ipAddress) }
+            emit(result)
+        }.flowOn(dispatchersProvider.io())
+    }
 }

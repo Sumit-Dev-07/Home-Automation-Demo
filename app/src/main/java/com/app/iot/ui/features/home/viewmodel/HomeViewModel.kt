@@ -18,6 +18,9 @@ class HomeViewModel @Inject constructor(
     private val _ledState = MutableStateFlow<UiState<ResponseBody>>(UiState.Idle)
     val ledState: StateFlow<UiState<ResponseBody>> = _ledState.asStateFlow()
 
+    private val _statusState = MutableStateFlow<UiState<ResponseBody>>(UiState.Idle)
+    val statusState: StateFlow<UiState<ResponseBody>> = _statusState.asStateFlow()
+
     fun controlLed(ipAddress: String, turnOn: Boolean) {
         viewModelScope.launch {
             val call = if (turnOn) homeUseCase.ledOn(ipAddress) else homeUseCase.ledOff(ipAddress)
@@ -25,6 +28,17 @@ class HomeViewModel @Inject constructor(
                 .catch { error -> _ledState.value = UiState.Error("${error.localizedMessage}") }
                 .collect { result ->
                     _ledState.value = result
+                }
+        }
+    }
+
+    fun fetchStatus(ipAddress: String) {
+        viewModelScope.launch {
+            homeUseCase.getStatus(ipAddress)
+                .onStart { _statusState.value = UiState.Loading }
+                .catch { error -> _statusState.value = UiState.Error("${error.localizedMessage}") }
+                .collect { result ->
+                    _statusState.value = result
                 }
         }
     }

@@ -28,4 +28,14 @@ class HomeUseCase @Inject constructor(private val homeRepository: HomeRepository
             }
         }
     }
+
+    suspend fun getStatus(ipAddress: String): Flow<UiState<ResponseBody>> {
+        return homeRepository.getStatus(ipAddress).map { result ->
+            when (result) {
+                is ApiState.Loading -> UiState.Loading
+                is ApiState.Success -> UiState.Success(result.data)
+                is ApiState.Error -> UiState.Error(result.message)
+            }
+        }
+    }
 }
