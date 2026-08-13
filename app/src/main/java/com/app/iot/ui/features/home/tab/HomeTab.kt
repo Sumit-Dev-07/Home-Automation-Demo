@@ -5,15 +5,24 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.net.wifi.WifiInfo
-import android.net.wifi.WifiManager
-import android.widget.Toast
 import androidx.compose.foundation.Image
-import java.util.Locale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -21,29 +30,43 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lightbulb
-import androidx.compose.material.icons.filled.DeviceThermostat
 import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.DeveloperBoard
+import androidx.compose.material.icons.filled.DeviceThermostat
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.DeveloperBoard
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.app.iot.R
 import com.app.iot.data.ApiPath
 import com.app.iot.ui.features.home.viewmodel.DeviceStatus
@@ -54,6 +77,7 @@ import com.app.iot.ui.theme.OnestMedium
 import com.app.iot.ui.theme.OnestRegular
 import com.app.iot.ui.theme.OnestSemiBold
 import com.app.iot.util.UiState
+import java.net.Inet4Address
 
 @Composable
 fun HomeTab(
@@ -64,28 +88,41 @@ fun HomeTab(
     val snackbarHostState = remember { SnackbarHostState() }
     var isAppWifiConnected by remember { mutableStateOf(false) }
     var systemIpAddress by remember { mutableStateOf("0.0.0.0") }
-    var showIpDialog by remember { mutableStateOf(false) }
     var selectedDeviceIp by remember { mutableStateOf(ApiPath.LOCAL_WIFI_IP_URL) }
     var selectedDeviceName by remember { mutableStateOf("") }
-    
+
     val ledState by viewModel.ledState.collectAsState()
     val statusState by viewModel.statusState.collectAsState()
     val scanState by viewModel.scanState.collectAsState()
     val devices by viewModel.devices.collectAsState()
 
     fun updateIpAddress() {
-        val wifiMan = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
-        val wifiInf = wifiMan.connectionInfo
-        val ipAddress = wifiInf.ipAddress
-        systemIpAddress = if (ipAddress == 0) "0.0.0.0"
-        else String.format(
-            Locale.getDefault(),
-            "%d.%d.%d.%d",
-            ipAddress and 0xff,
-            ipAddress shr 8 and 0xff,
-            ipAddress shr 16 and 0xff,
-            ipAddress shr 24 and 0xff
-        )
+        val connectivityManager =
+            context.applicationContext
+                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        val network = connectivityManager.activeNetwork
+
+        if (network == null) {
+            systemIpAddress = "0.0.0.0"
+            return
+        }
+
+        val capabilities = connectivityManager.getNetworkCapabilities(network)
+
+        if (capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) != true) {
+            systemIpAddress = "0.0.0.0"
+            return
+        }
+
+        val linkProperties = connectivityManager.getLinkProperties(network)
+
+        systemIpAddress = linkProperties
+            ?.linkAddresses
+            ?.firstOrNull { it.address is Inet4Address }
+            ?.address
+            ?.hostAddress
+            ?: "0.0.0.0"
     }
 
     DisposableEffect(context) {
@@ -127,12 +164,12 @@ fun HomeTab(
         ) {
             // App WiFi Status
             WifiStatusHeader(
-                isConnected = isAppWifiConnected, 
+                isConnected = isAppWifiConnected,
                 ipAddress = systemIpAddress,
                 isRefreshing = statusState is UiState.Loading,
                 onRefresh = { updateIpAddress() }
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
 
             if (selectedDeviceIp.isNotEmpty()) {
@@ -342,7 +379,7 @@ fun FindDevicesCard(onFind: () -> Unit) {
                         )
                     }
                 }
-                
+
                 Button(
                     onClick = onFind,
                     colors = ButtonDefaults.buttonColors(
@@ -416,7 +453,7 @@ fun DiscoveryDialog(
                         fontSize = 18.sp,
                         color = Color(0xFF212121)
                     )
-                    
+
                     Spacer(modifier = Modifier.height(20.dp))
 
                     Box(
@@ -442,6 +479,7 @@ fun DiscoveryDialog(
                                     )
                                 }
                             }
+
                             is UiState.Success -> {
                                 LazyColumn(
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -462,7 +500,7 @@ fun DiscoveryDialog(
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 Icon(
-                                                    Icons.Default.Wifi, 
+                                                    Icons.Default.Wifi,
                                                     contentDescription = null,
                                                     tint = Color(0xFF4CAF50),
                                                     modifier = Modifier.size(20.dp)
@@ -487,15 +525,17 @@ fun DiscoveryDialog(
                                     }
                                 }
                             }
+
                             is UiState.Error -> {
                                 Text(
-                                    state.message, 
+                                    state.message,
                                     fontFamily = OnestRegular,
                                     fontSize = 14.sp,
                                     color = Color(0xFFF44336),
                                     textAlign = androidx.compose.ui.text.style.TextAlign.Center
                                 )
                             }
+
                             else -> {}
                         }
                     }
@@ -521,8 +561,8 @@ fun DiscoveryDialog(
 
 @Composable
 fun WifiStatusHeader(
-    isConnected: Boolean, 
-    ipAddress: String, 
+    isConnected: Boolean,
+    ipAddress: String,
     isRefreshing: Boolean,
     onRefresh: () -> Unit
 ) {
@@ -608,7 +648,7 @@ fun DeviceItem(
     val innerCornerRadius = 20.dp
     val gap = 6.dp
 
-    val icon = when(device.iconType) {
+    val icon = when (device.iconType) {
         "ac" -> Icons.Default.Air
         "tv" -> Icons.Default.Tv
         "thermostat" -> Icons.Default.DeviceThermostat
@@ -656,9 +696,9 @@ fun DeviceItem(
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = if (device.isOn && device.isConnected) Color(0xFFE64A19) 
-                               else if (!device.isConnected) Color(0xFFF44336)
-                               else Color(0xFF9E9E9E),
+                        tint = if (device.isOn && device.isConnected) Color(0xFFE64A19)
+                        else if (!device.isConnected) Color(0xFFF44336)
+                        else Color(0xFF9E9E9E),
                         modifier = Modifier.size(28.dp)
                     )
                     Switch(
@@ -675,7 +715,7 @@ fun DeviceItem(
                         )
                     )
                 }
-                
+
                 Column {
                     Text(
                         text = device.name,
@@ -683,7 +723,7 @@ fun DeviceItem(
                         fontSize = 15.sp,
                         color = if (!device.isConnected) Color(0xFFC62828) else Color(0xFF212121)
                     )
-                    
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(vertical = 2.dp)
@@ -708,8 +748,8 @@ fun DeviceItem(
                         text = if (device.isOn) "On" else "Off",
                         fontFamily = OnestMedium,
                         fontSize = 13.sp,
-                        color = if (device.isOn && device.isConnected) Color(0xFFE64A19) 
-                                else Color(0xFF9E9E9E)
+                        color = if (device.isOn && device.isConnected) Color(0xFFE64A19)
+                        else Color(0xFF9E9E9E)
                     )
                 }
             }
