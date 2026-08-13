@@ -1,5 +1,13 @@
 package com.app.iot.ui.features.home.tab
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.net.wifi.WifiInfo
+import android.net.wifi.WifiManager
+import java.util.Locale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -21,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.app.iot.ui.theme.OnestBold
@@ -30,8 +39,55 @@ import com.app.iot.ui.theme.OnestSemiBold
 
 @Composable
 fun HomeTab(modifier: PaddingValues) {
-    var isAppWifiConnected by remember { mutableStateOf(true) }
-    val systemIpAddress by remember { mutableStateOf("192.168.1.105") }
+    val context = LocalContext.current
+    var isAppWifiConnected by remember { mutableStateOf(false) }
+    var systemIpAddress by remember { mutableStateOf("0.0.0.0") }
+
+    fun updateIpAddress() {
+        val wifiMan = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        val wifiInf = wifiMan.connectionInfo
+        val ipAddress = wifiInf.ipAddress
+        systemIpAddress = if (ipAddress == 0) "0.0.0.0"
+        else String.format(
+            Locale.getDefault(),
+            "%d.%d.%d.%d",
+            ipAddress and 0xff,
+            ipAddress shr 8 and 0xff,
+            ipAddress shr 16 and 0xff,
+            ipAddress shr 24 and 0xff
+        )
+    }
+
+    DisposableEffect(context) {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkRequest = NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .build()
+
+        val networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                isAppWifiConnected = true
+                updateIpAddress()
+            }
+
+            override fun onLost(network: Network) {
+                isAppWifiConnected = false
+                systemIpAddress = "0.0.0.0"
+            }
+
+            override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+                // Update IP in case it changed (e.g. DHCP renewal)
+                updateIpAddress()
+            }
+        }
+
+        connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
+
+        onDispose {
+            connectivityManager.unregisterNetworkCallback(networkCallback)
+        }
+    }
+
     var devices by remember {
         mutableStateOf(
             listOf(
