@@ -28,6 +28,20 @@ class HomeRepositoryImpl @Inject constructor(
         }.flowOn(dispatchersProvider.io())
     }
 
+    override suspend fun led2On(): Flow<ApiState<ResponseBody>> {
+        return flow {
+            val result = safeApiCall { homeDataSource.led2On() }
+            emit(result)
+        }.flowOn(dispatchersProvider.io())
+    }
+
+    override suspend fun led2Off(): Flow<ApiState<ResponseBody>> {
+        return flow {
+            val result = safeApiCall { homeDataSource.led2Off() }
+            emit(result)
+        }.flowOn(dispatchersProvider.io())
+    }
+
     override suspend fun getStatus(): Flow<ApiState<ResponseBody>> {
         return flow {
             val result = safeApiCall { homeDataSource.getStatus() }

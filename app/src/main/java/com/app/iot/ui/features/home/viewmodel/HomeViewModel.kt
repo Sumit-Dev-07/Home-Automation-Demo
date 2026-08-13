@@ -16,6 +16,7 @@ import java.net.InetAddress
 import javax.inject.Inject
 
 data class DeviceStatus(
+    val id: Int = 1,
     val name: String,
     val isOn: Boolean,
     val isConnected: Boolean,
@@ -53,9 +54,13 @@ class HomeViewModel @Inject constructor(
     private val UDP_PORT = 4210
     private val DISCOVERY_MESSAGE = "DISCOVER_ESP"
 
-    fun controlLed(turnOn: Boolean) {
+    fun controlLed(id: Int, turnOn: Boolean) {
         viewModelScope.launch {
-            val call = if (turnOn) homeUseCase.ledOn() else homeUseCase.ledOff()
+            val call = when (id) {
+                1 -> if (turnOn) homeUseCase.ledOn() else homeUseCase.ledOff()
+                2 -> if (turnOn) homeUseCase.led2On() else homeUseCase.led2Off()
+                else -> if (turnOn) homeUseCase.ledOn() else homeUseCase.ledOff()
+            }
             call.onStart { _ledState.value = UiState.Loading }
                 .catch { error -> _ledState.value = UiState.Error("${error.localizedMessage}") }
                 .collect { result ->
@@ -90,17 +95,43 @@ class HomeViewModel @Inject constructor(
             val json = JSONObject(jsonString)
             val deviceName = json.optString("device", "ESP Device")
             val ip = json.optString("ip", "")
-            val status = json.optString("status", "OFF")
-            val isOn = status == "ON"
 
-            // Check if there are multiple relays
+            val newList = mutableListOf<DeviceStatus>()
+
+            if (json.has("led1")) {
+                newList.add(
+                    DeviceStatus(
+                        id = 1,
+                        name = "Light 1",
+                        isOn = json.optString("led1") == "ON",
+                        isConnected = true,
+                        ipAddress = ip,
+                        iconType = "light"
+                    )
+                )
+            }
+
+            if (json.has("led2")) {
+                newList.add(
+                    DeviceStatus(
+                        id = 2,
+                        name = "Light 2",
+                        isOn = json.optString("led2") == "ON",
+                        isConnected = true,
+                        ipAddress = ip,
+                        iconType = "light"
+                    )
+                )
+            }
+
+            // Check if there are multiple relays (keeping old logic just in case)
             val relaysArray = json.optJSONArray("relays")
             if (relaysArray != null) {
-                val newList = mutableListOf<DeviceStatus>()
                 for (i in 0 until relaysArray.length()) {
                     val relayJson = relaysArray.getJSONObject(i)
                     newList.add(
                         DeviceStatus(
+                            id = i + 1,
                             name = relayJson.optString("name", "Relay ${i + 1}"),
                             isOn = relayJson.optString("status", "OFF") == "ON",
                             isConnected = true,
@@ -109,11 +140,14 @@ class HomeViewModel @Inject constructor(
                         )
                     )
                 }
-                _devices.value = newList
-            } else {
-                // Fallback to single LED status if no relays array
-                _devices.value = listOf(
+            }
+
+            if (newList.isEmpty()) {
+                val status = json.optString("status", "OFF")
+                val isOn = status == "ON"
+                newList.add(
                     DeviceStatus(
+                        id = 1,
                         name = deviceName,
                         isOn = isOn,
                         isConnected = true,
@@ -122,6 +156,8 @@ class HomeViewModel @Inject constructor(
                     )
                 )
             }
+
+            _devices.value = newList
         } catch (e: Exception) {
             e.printStackTrace()
         }

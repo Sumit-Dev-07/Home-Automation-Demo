@@ -197,7 +197,7 @@ fun HomeTab(
                         onCheckedChange = { isChecked ->
                             // Trigger API call for Light (LED)
                             if (isAppWifiConnected) {
-                                viewModel.controlLed(isChecked)
+                                viewModel.controlLed(device.id, isChecked)
                             }
                         }
                     )

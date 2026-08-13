@@ -29,6 +29,26 @@ class HomeUseCase @Inject constructor(private val homeRepository: HomeRepository
         }
     }
 
+    suspend fun led2On(): Flow<UiState<ResponseBody>> {
+        return homeRepository.led2On().map { result ->
+            when (result) {
+                is ApiState.Loading -> UiState.Loading
+                is ApiState.Success -> UiState.Success(result.data)
+                is ApiState.Error -> UiState.Error(result.message)
+            }
+        }
+    }
+
+    suspend fun led2Off(): Flow<UiState<ResponseBody>> {
+        return homeRepository.led2Off().map { result ->
+            when (result) {
+                is ApiState.Loading -> UiState.Loading
+                is ApiState.Success -> UiState.Success(result.data)
+                is ApiState.Error -> UiState.Error(result.message)
+            }
+        }
+    }
+
     suspend fun getStatus(): Flow<UiState<ResponseBody>> {
         return homeRepository.getStatus().map { result ->
             when (result) {
