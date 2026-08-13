@@ -7,6 +7,8 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
+import android.widget.Toast
+import androidx.compose.foundation.Image
 import java.util.Locale
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -35,15 +37,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.app.iot.R
 import com.app.iot.data.ApiPath
+import com.app.iot.ui.features.home.viewmodel.DiscoveredDevice
 import com.app.iot.ui.features.home.viewmodel.HomeViewModel
 import com.app.iot.ui.theme.OnestBold
 import com.app.iot.ui.theme.OnestMedium
 import com.app.iot.ui.theme.OnestRegular
 import com.app.iot.ui.theme.OnestSemiBold
+import com.app.iot.util.UiState
 
 @Composable
 fun HomeTab(
@@ -73,7 +81,6 @@ fun HomeTab(
             ipAddress shr 16 and 0xff,
             ipAddress shr 24 and 0xff
         )
-        ApiPath.LOCAL_WIFI_IP_URL = systemIpAddress
     }
 
     DisposableEffect(context) {
@@ -128,12 +135,18 @@ fun HomeTab(
             WifiStatusHeader(
                 isConnected = isAppWifiConnected, 
                 ipAddress = systemIpAddress,
-                isRefreshing = statusState is com.app.iot.util.UiState.Loading,
-                onEditIp = { showIpDialog = true },
-                onFindDevices = { viewModel.findEspDevices(systemIpAddress) },
+                isRefreshing = statusState is UiState.Loading,
                 onRefresh = { updateIpAddress() }
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Discovery Card
+            if (isAppWifiConnected) {
+                FindDevicesCard(onFind = { viewModel.findEspDevices(systemIpAddress) })
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -148,7 +161,7 @@ fun HomeTab(
                             }
                             // Trigger API call for Light (LED)
                             if (device.name == "Light" && isAppWifiConnected) {
-                                viewModel.controlLed(systemIpAddress, isChecked)
+                                viewModel.controlLed( isChecked)
                             }
                         }
                     )
@@ -163,36 +176,24 @@ fun HomeTab(
 
         // Error handling
         LaunchedEffect(ledState) {
-            if (ledState is com.app.iot.util.UiState.Error) {
-                snackbarHostState.showSnackbar((ledState as com.app.iot.util.UiState.Error).message)
+            if (ledState is UiState.Error) {
+                snackbarHostState.showSnackbar((ledState as UiState.Error).message)
             }
         }
 
         // Fetch status when IP is available
         LaunchedEffect(systemIpAddress) {
             if (systemIpAddress != "0.0.0.0" && isAppWifiConnected) {
-                viewModel.fetchStatus(systemIpAddress)
+                viewModel.fetchStatus()
             }
         }
 
-        if (showIpDialog) {
-            ManualIpDialog(
-                currentIp = systemIpAddress,
-                onDismiss = { showIpDialog = false },
-                onConfirm = { newIp ->
-                    systemIpAddress = newIp
-                    ApiPath.LOCAL_WIFI_IP_URL = newIp
-                    showIpDialog = false
-                }
-            )
-        }
-
-        if (scanState is com.app.iot.util.UiState.Loading || scanState is com.app.iot.util.UiState.Success || scanState is com.app.iot.util.UiState.Error) {
+        if (scanState is UiState.Loading || scanState is UiState.Success || scanState is UiState.Error) {
             DiscoveryDialog(
                 state = scanState,
                 onDismiss = { viewModel.resetScanState() },
                 onSelectIp = { newIp ->
-                    systemIpAddress = newIp
+                    Toast.makeText(context, newIp, Toast.LENGTH_SHORT).show()
                     ApiPath.LOCAL_WIFI_IP_URL = newIp
                     viewModel.resetScanState()
                 }
@@ -202,95 +203,242 @@ fun HomeTab(
 }
 
 @Composable
-fun DiscoveryDialog(
-    state: com.app.iot.util.UiState<List<String>>,
-    onDismiss: () -> Unit,
-    onSelectIp: (String) -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = "Scanning Network", fontFamily = OnestBold) },
-        text = {
-            Column(
+fun FindDevicesCard(onFind: () -> Unit) {
+    val outerCornerRadius = 24.dp
+    val innerCornerRadius = 20.dp
+    val gap = 6.dp
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Outer layer (Glow/Border effect)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(outerCornerRadius))
+                .background(Color.Black.copy(alpha = 0.05f))
+                .border(
+                    1.dp,
+                    Color.Black.copy(alpha = 0.1f),
+                    RoundedCornerShape(outerCornerRadius),
+                )
+        )
+
+        // Main Card
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(gap)
+                .clip(RoundedCornerShape(innerCornerRadius)),
+            color = Color.White
+        ) {
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 300.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                when (state) {
-                    is com.app.iot.util.UiState.Loading -> {
-                        CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text("Searching for ESP devices...")
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_devices),
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = "Find Devices",
+                            fontFamily = OnestSemiBold,
+                            fontSize = 16.sp,
+                            color = Color(0xFF212121)
+                        )
+                        Text(
+                            text = "Scan network for ESP devices",
+                            fontFamily = OnestRegular,
+                            fontSize = 12.sp,
+                            color = Color.Gray
+                        )
                     }
-                    is com.app.iot.util.UiState.Success -> {
-                        LazyColumn {
-                            items(state.data) { ip ->
-                                ListItem(
-                                    headlineContent = { Text(ip) },
-                                    leadingContent = { Icon(Icons.Default.Wifi, contentDescription = null) },
-                                    modifier = Modifier.clickable { 
-                                        onSelectIp(ip)
-                                        onDismiss()
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    is com.app.iot.util.UiState.Error -> {
-                        Text(state.message, color = Color.Red)
-                    }
-                    else -> {}
+                }
+                
+                Button(
+                    onClick = onFind,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFE64A19)
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
+                ) {
+                    Text(
+                        text = "Scan",
+                        fontFamily = OnestMedium,
+                        fontSize = 14.sp,
+                        color = Color.White
+                    )
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Close")
-            }
         }
-    )
+    }
 }
 
 @Composable
-fun ManualIpDialog(
-    currentIp: String,
+fun DiscoveryDialog(
+    state: UiState<List<DiscoveredDevice>>,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onSelectIp: (String) -> Unit
 ) {
-    var text by remember { mutableStateOf(currentIp) }
-
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Change IP Address", fontFamily = OnestBold) },
-        text = {
-            Column {
-                Text(text = "Enter the IP address of your IoT device:", fontSize = 14.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-                TextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    placeholder = { Text("192.168.x.x") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        val outerCornerRadius = 24.dp
+        val innerCornerRadius = 20.dp
+        val gap = 6.dp
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.85f)
+                .wrapContentHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            // Outer layer (Glow/Border effect)
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(outerCornerRadius))
+                    .background(Color.Black.copy(alpha = 0.05f))
+                    .border(
+                        1.dp,
+                        Color.Black.copy(alpha = 0.1f),
+                        RoundedCornerShape(outerCornerRadius),
                     )
-                )
-            }
-        },
-        confirmButton = {
-            Button(onClick = { onConfirm(text) }) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
+            )
+
+            // Main Card
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(gap)
+                    .clip(RoundedCornerShape(innerCornerRadius)),
+                color = Color.White
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Scanning Network",
+                        fontFamily = OnestBold,
+                        fontSize = 18.sp,
+                        color = Color(0xFF212121)
+                    )
+                    
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 300.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        when (state) {
+                            is UiState.Loading -> {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    CircularProgressIndicator(
+                                        color = Color(0xFF4CAF50),
+                                        strokeWidth = 3.dp,
+                                        modifier = Modifier.size(40.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    Text(
+                                        "Searching for ESP devices...",
+                                        fontFamily = OnestRegular,
+                                        fontSize = 14.sp,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                            is UiState.Success -> {
+                                LazyColumn(
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    items(state.data) { device ->
+                                        Surface(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable {
+                                                    onSelectIp(device.ip)
+                                                    onDismiss()
+                                                },
+                                            shape = RoundedCornerShape(12.dp),
+                                            color = Color(0xFFF5F5F5)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier.padding(12.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Wifi, 
+                                                    contentDescription = null,
+                                                    tint = Color(0xFF4CAF50),
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(12.dp))
+                                                Column {
+                                                    Text(
+                                                        text = device.name,
+                                                        fontFamily = OnestMedium,
+                                                        fontSize = 14.sp,
+                                                        color = Color(0xFF424242)
+                                                    )
+                                                    Text(
+                                                        text = device.ip,
+                                                        fontFamily = OnestRegular,
+                                                        fontSize = 11.sp,
+                                                        color = Color.Gray
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            is UiState.Error -> {
+                                Text(
+                                    state.message, 
+                                    fontFamily = OnestRegular,
+                                    fontSize = 14.sp,
+                                    color = Color(0xFFF44336),
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
+                            else -> {}
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    TextButton(
+                        onClick = onDismiss,
+                        modifier = Modifier.align(Alignment.End)
+                    ) {
+                        Text(
+                            "Close",
+                            fontFamily = OnestSemiBold,
+                            fontSize = 14.sp,
+                            color = Color(0xFFE64A19)
+                        )
+                    }
+                }
             }
         }
-    )
+    }
 }
 
 @Composable
@@ -298,8 +446,6 @@ fun WifiStatusHeader(
     isConnected: Boolean, 
     ipAddress: String, 
     isRefreshing: Boolean,
-    onEditIp: () -> Unit,
-    onFindDevices: () -> Unit,
     onRefresh: () -> Unit
 ) {
     val outerCornerRadius = 24.dp
@@ -357,15 +503,6 @@ fun WifiStatusHeader(
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                if (isConnected) {
-                    IconButton(onClick = onFindDevices) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Find Devices",
-                            tint = Color(0xFFE64A19)
-                        )
-                    }
-                }
                 if (!isConnected) {
                     TextButton(
                         onClick = onRefresh,
@@ -373,18 +510,6 @@ fun WifiStatusHeader(
                     ) {
                         Text(
                             text = "Connect",
-                            fontFamily = OnestSemiBold,
-                            fontSize = 12.sp,
-                            color = Color(0xFFC62828)
-                        )
-                    }
-                } else {
-                    TextButton(
-                        onClick = onEditIp,
-                        contentPadding = PaddingValues(horizontal = 8.dp)
-                    ) {
-                        Text(
-                            text = "Edit",
                             fontFamily = OnestSemiBold,
                             fontSize = 12.sp,
                             color = Color(0xFFC62828)

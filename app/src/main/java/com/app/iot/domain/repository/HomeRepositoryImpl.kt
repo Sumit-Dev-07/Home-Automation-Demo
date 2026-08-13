@@ -14,23 +14,23 @@ class HomeRepositoryImpl @Inject constructor(
     private val homeDataSource: HomeDataSource,
     private val dispatchersProvider: DispatchersProvider
 ) : HomeRepository {
-    override suspend fun ledOn(ipAddress: String): Flow<ApiState<ResponseBody>> {
+    override suspend fun ledOn(): Flow<ApiState<ResponseBody>> {
         return flow {
-            val result = safeApiCall { homeDataSource.ledOn(ipAddress) }
+            val result = safeApiCall { homeDataSource.ledOn() }
             emit(result)
         }.flowOn(dispatchersProvider.io())
     }
 
-    override suspend fun ledOff(ipAddress: String): Flow<ApiState<ResponseBody>> {
+    override suspend fun ledOff(): Flow<ApiState<ResponseBody>> {
         return flow {
-            val result = safeApiCall { homeDataSource.ledOff(ipAddress) }
+            val result = safeApiCall { homeDataSource.ledOff() }
             emit(result)
         }.flowOn(dispatchersProvider.io())
     }
 
-    override suspend fun getStatus(ipAddress: String): Flow<ApiState<ResponseBody>> {
+    override suspend fun getStatus(): Flow<ApiState<ResponseBody>> {
         return flow {
-            val result = safeApiCall { homeDataSource.getStatus(ipAddress) }
+            val result = safeApiCall { homeDataSource.getStatus() }
             emit(result)
         }.flowOn(dispatchersProvider.io())
     }

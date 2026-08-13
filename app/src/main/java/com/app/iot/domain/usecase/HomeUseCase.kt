@@ -9,8 +9,8 @@ import okhttp3.ResponseBody
 import javax.inject.Inject
 
 class HomeUseCase @Inject constructor(private val homeRepository: HomeRepository) {
-    suspend fun ledOn(ipAddress: String): Flow<UiState<ResponseBody>> {
-        return homeRepository.ledOn(ipAddress).map { result ->
+    suspend fun ledOn(): Flow<UiState<ResponseBody>> {
+        return homeRepository.ledOn().map { result ->
             when (result) {
                 is ApiState.Loading -> UiState.Loading
                 is ApiState.Success -> UiState.Success(result.data)
@@ -19,8 +19,8 @@ class HomeUseCase @Inject constructor(private val homeRepository: HomeRepository
         }
     }
 
-    suspend fun ledOff(ipAddress: String): Flow<UiState<ResponseBody>> {
-        return homeRepository.ledOff(ipAddress).map { result ->
+    suspend fun ledOff(): Flow<UiState<ResponseBody>> {
+        return homeRepository.ledOff().map { result ->
             when (result) {
                 is ApiState.Loading -> UiState.Loading
                 is ApiState.Success -> UiState.Success(result.data)
@@ -29,8 +29,8 @@ class HomeUseCase @Inject constructor(private val homeRepository: HomeRepository
         }
     }
 
-    suspend fun getStatus(ipAddress: String): Flow<UiState<ResponseBody>> {
-        return homeRepository.getStatus(ipAddress).map { result ->
+    suspend fun getStatus(): Flow<UiState<ResponseBody>> {
+        return homeRepository.getStatus().map { result ->
             when (result) {
                 is ApiState.Loading -> UiState.Loading
                 is ApiState.Success -> UiState.Success(result.data)
