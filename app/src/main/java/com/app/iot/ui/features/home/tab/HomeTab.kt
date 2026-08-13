@@ -32,16 +32,25 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.app.iot.data.ApiPath
+import com.app.iot.ui.features.home.viewmodel.HomeViewModel
 import com.app.iot.ui.theme.OnestBold
 import com.app.iot.ui.theme.OnestMedium
 import com.app.iot.ui.theme.OnestRegular
 import com.app.iot.ui.theme.OnestSemiBold
 
 @Composable
-fun HomeTab(modifier: PaddingValues) {
+fun HomeTab(
+    modifier: PaddingValues,
+    viewModel: HomeViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
     var isAppWifiConnected by remember { mutableStateOf(false) }
     var systemIpAddress by remember { mutableStateOf("0.0.0.0") }
+    
+    val ledState by viewModel.ledState.collectAsState()
 
     fun updateIpAddress() {
         val wifiMan = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -56,6 +65,7 @@ fun HomeTab(modifier: PaddingValues) {
             ipAddress shr 16 and 0xff,
             ipAddress shr 24 and 0xff
         )
+        ApiPath.LOCAL_WIFI_IP_URL = systemIpAddress
     }
 
     DisposableEffect(context) {
@@ -99,29 +109,47 @@ fun HomeTab(modifier: PaddingValues) {
         )
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(modifier)
-            .padding(16.dp)
-    ) {
-        // App WiFi Status
-        WifiStatusHeader(isConnected = isAppWifiConnected, ipAddress = systemIpAddress)
-        Spacer(modifier = Modifier.height(24.dp))
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(modifier)
+                .padding(16.dp)
         ) {
-            items(devices) { device ->
-                DeviceItem(
-                    device = device,
-                    onCheckedChange = { isChecked ->
-                        devices = devices.map {
-                            if (it.name == device.name) it.copy(isOn = isChecked) else it
+            // App WiFi Status
+            WifiStatusHeader(isConnected = isAppWifiConnected, ipAddress = systemIpAddress)
+            Spacer(modifier = Modifier.height(24.dp))
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(devices) { device ->
+                    DeviceItem(
+                        device = device,
+                        onCheckedChange = { isChecked ->
+                            devices = devices.map {
+                                if (it.name == device.name) it.copy(isOn = isChecked) else it
+                            }
+                            // Trigger API call for Light (LED)
+                            if (device.name == "Light" && isAppWifiConnected) {
+                                viewModel.controlLed(systemIpAddress, isChecked)
+                            }
                         }
-                    }
-                )
+                    )
+                }
+            }
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+
+        // Error handling
+        LaunchedEffect(ledState) {
+            if (ledState is com.app.iot.util.UiState.Error) {
+                snackbarHostState.showSnackbar((ledState as com.app.iot.util.UiState.Error).message)
             }
         }
     }
