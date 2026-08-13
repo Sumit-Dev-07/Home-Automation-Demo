@@ -46,6 +46,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.app.iot.R
 import com.app.iot.data.ApiPath
+import com.app.iot.ui.features.home.viewmodel.DeviceStatus
 import com.app.iot.ui.features.home.viewmodel.DiscoveredDevice
 import com.app.iot.ui.features.home.viewmodel.HomeViewModel
 import com.app.iot.ui.theme.OnestBold
@@ -70,6 +71,7 @@ fun HomeTab(
     val ledState by viewModel.ledState.collectAsState()
     val statusState by viewModel.statusState.collectAsState()
     val scanState by viewModel.scanState.collectAsState()
+    val devices by viewModel.devices.collectAsState()
 
     fun updateIpAddress() {
         val wifiMan = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -116,17 +118,6 @@ fun HomeTab(
         }
     }
 
-    var devices by remember {
-        mutableStateOf(
-            listOf(
-                DeviceStatus("Light", Icons.Default.Lightbulb, true, true, "192.168.1.10"),
-                DeviceStatus("AC", Icons.Default.Air, false, true, "192.168.1.15"),
-                DeviceStatus("Smart TV", Icons.Default.Tv, true, false, "0.0.0.0"),
-                DeviceStatus("Thermostat", Icons.Default.DeviceThermostat, false, true, "192.168.1.20")
-            )
-        )
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -167,12 +158,9 @@ fun HomeTab(
                     DeviceItem(
                         device = device,
                         onCheckedChange = { isChecked ->
-                            devices = devices.map {
-                                if (it.name == device.name) it.copy(isOn = isChecked) else it
-                            }
                             // Trigger API call for Light (LED)
-                            if (device.name == "Light" && isAppWifiConnected) {
-                                viewModel.controlLed( isChecked)
+                            if (isAppWifiConnected) {
+                                viewModel.controlLed(isChecked)
                             }
                         }
                     )
@@ -208,6 +196,7 @@ fun HomeTab(
                     selectedDeviceIp = device.ip
                     selectedDeviceName = device.name
                     viewModel.resetScanState()
+                    viewModel.fetchStatus()
                 }
             )
         }
@@ -610,14 +599,6 @@ fun WifiStatusHeader(
     }
 }
 
-data class DeviceStatus(
-    val name: String,
-    val icon: ImageVector,
-    val isOn: Boolean,
-    val isConnected: Boolean,
-    val ipAddress: String
-)
-
 @Composable
 fun DeviceItem(
     device: DeviceStatus,
@@ -626,6 +607,13 @@ fun DeviceItem(
     val outerCornerRadius = 24.dp
     val innerCornerRadius = 20.dp
     val gap = 6.dp
+
+    val icon = when(device.iconType) {
+        "ac" -> Icons.Default.Air
+        "tv" -> Icons.Default.Tv
+        "thermostat" -> Icons.Default.DeviceThermostat
+        else -> Icons.Default.Lightbulb
+    }
 
     Box(
         modifier = Modifier
@@ -666,7 +654,7 @@ fun DeviceItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        imageVector = device.icon,
+                        imageVector = icon,
                         contentDescription = null,
                         tint = if (device.isOn && device.isConnected) Color(0xFFE64A19) 
                                else if (!device.isConnected) Color(0xFFF44336)

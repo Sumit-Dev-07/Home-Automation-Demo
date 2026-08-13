@@ -9,10 +9,19 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import okhttp3.ResponseBody
+import org.json.JSONObject
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 import javax.inject.Inject
+
+data class DeviceStatus(
+    val name: String,
+    val isOn: Boolean,
+    val isConnected: Boolean,
+    val ipAddress: String,
+    val iconType: String = "light"
+)
 
 data class DiscoveredDevice(
     val name: String,
@@ -38,6 +47,9 @@ class HomeViewModel @Inject constructor(
     private val _scanState = MutableStateFlow<UiState<List<DiscoveredDevice>>>(UiState.Idle)
     val scanState: StateFlow<UiState<List<DiscoveredDevice>>> = _scanState.asStateFlow()
 
+    private val _devices = MutableStateFlow<List<DeviceStatus>>(emptyList())
+    val devices: StateFlow<List<DeviceStatus>> = _devices.asStateFlow()
+
     private val UDP_PORT = 4210
     private val DISCOVERY_MESSAGE = "DISCOVER_ESP"
 
@@ -48,6 +60,9 @@ class HomeViewModel @Inject constructor(
                 .catch { error -> _ledState.value = UiState.Error("${error.localizedMessage}") }
                 .collect { result ->
                     _ledState.value = result
+                    if (result is UiState.Success) {
+                        fetchStatus() // Refresh status after control
+                    }
                 }
         }
     }
@@ -56,10 +71,59 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             homeUseCase.getStatus()
                 .onStart { _statusState.value = UiState.Loading }
-                .catch { error -> _statusState.value = UiState.Error("${error.localizedMessage}") }
+                .catch { error -> 
+                    _statusState.value = UiState.Error("${error.localizedMessage}")
+                    // On error, mark all devices as disconnected
+                    _devices.value = _devices.value.map { it.copy(isConnected = false) }
+                }
                 .collect { result ->
                     _statusState.value = result
+                    if (result is UiState.Success) {
+                        parseStatusResponse(result.data.string())
+                    }
                 }
+        }
+    }
+
+    private fun parseStatusResponse(jsonString: String) {
+        try {
+            val json = JSONObject(jsonString)
+            val deviceName = json.optString("device", "ESP Device")
+            val ip = json.optString("ip", "")
+            val status = json.optString("status", "OFF")
+            val isOn = status == "ON"
+
+            // Check if there are multiple relays
+            val relaysArray = json.optJSONArray("relays")
+            if (relaysArray != null) {
+                val newList = mutableListOf<DeviceStatus>()
+                for (i in 0 until relaysArray.length()) {
+                    val relayJson = relaysArray.getJSONObject(i)
+                    newList.add(
+                        DeviceStatus(
+                            name = relayJson.optString("name", "Relay ${i + 1}"),
+                            isOn = relayJson.optString("status", "OFF") == "ON",
+                            isConnected = true,
+                            ipAddress = ip,
+                            iconType = relayJson.optString("type", "light")
+                        )
+                    )
+                }
+                _devices.value = newList
+            } else {
+                // Fallback to single LED status if no relays array
+                _devices.value = listOf(
+                    DeviceStatus(
+                        name = deviceName,
+                        isOn = isOn,
+                        isConnected = true,
+                        ipAddress = ip,
+                        iconType = "light"
+                    )
+                )
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
