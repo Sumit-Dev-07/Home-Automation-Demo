@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.DeveloperBoard
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -63,6 +64,8 @@ fun HomeTab(
     var isAppWifiConnected by remember { mutableStateOf(false) }
     var systemIpAddress by remember { mutableStateOf("0.0.0.0") }
     var showIpDialog by remember { mutableStateOf(false) }
+    var selectedDeviceIp by remember { mutableStateOf(ApiPath.LOCAL_WIFI_IP_URL) }
+    var selectedDeviceName by remember { mutableStateOf("") }
     
     val ledState by viewModel.ledState.collectAsState()
     val statusState by viewModel.statusState.collectAsState()
@@ -141,12 +144,20 @@ fun HomeTab(
             
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Discovery Card
-            if (isAppWifiConnected) {
+            if (selectedDeviceIp.isNotEmpty()) {
+                SelectedDeviceCard(
+                    name = selectedDeviceName.ifEmpty { "Connected Device" },
+                    ipAddress = selectedDeviceIp,
+                    onChange = {
+                        viewModel.findEspDevices(systemIpAddress)
+                    }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            } else if (isAppWifiConnected) {
                 FindDevicesCard(onFind = { viewModel.findEspDevices(systemIpAddress) })
+                Spacer(modifier = Modifier.height(16.dp))
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -192,12 +203,90 @@ fun HomeTab(
             DiscoveryDialog(
                 state = scanState,
                 onDismiss = { viewModel.resetScanState() },
-                onSelectIp = { newIp ->
-                    Toast.makeText(context, newIp, Toast.LENGTH_SHORT).show()
-                    ApiPath.LOCAL_WIFI_IP_URL = newIp
+                onSelectDevice = { device ->
+                    ApiPath.LOCAL_WIFI_IP_URL = device.ip
+                    selectedDeviceIp = device.ip
+                    selectedDeviceName = device.name
                     viewModel.resetScanState()
                 }
             )
+        }
+    }
+}
+
+@Composable
+fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
+    val outerCornerRadius = 24.dp
+    val innerCornerRadius = 20.dp
+    val gap = 6.dp
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        // Outer layer (Glow/Border effect)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(outerCornerRadius))
+                .background(Color.Black.copy(alpha = 0.05f))
+                .border(
+                    1.dp,
+                    Color.Black.copy(alpha = 0.1f),
+                    RoundedCornerShape(outerCornerRadius),
+                )
+        )
+
+        // Main Card
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(gap)
+                .clip(RoundedCornerShape(innerCornerRadius)),
+            color = Color.White
+        ) {
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.DeveloperBoard,
+                        contentDescription = null,
+                        tint = Color(0xFF4CAF50),
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            text = name,
+                            fontFamily = OnestSemiBold,
+                            fontSize = 16.sp,
+                            color = Color(0xFF212121)
+                        )
+                        Text(
+                            text = "IP: $ipAddress",
+                            fontFamily = OnestRegular,
+                            fontSize = 12.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+
+                TextButton(onClick = onChange) {
+                    Text(
+                        text = "Change",
+                        fontFamily = OnestSemiBold,
+                        fontSize = 12.sp,
+                        color = Color(0xFFE64A19)
+                    )
+                }
+            }
         }
     }
 }
@@ -289,7 +378,7 @@ fun FindDevicesCard(onFind: () -> Unit) {
 fun DiscoveryDialog(
     state: UiState<List<DiscoveredDevice>>,
     onDismiss: () -> Unit,
-    onSelectIp: (String) -> Unit
+    onSelectDevice: (DiscoveredDevice) -> Unit
 ) {
     Dialog(
         onDismissRequest = onDismiss,
@@ -373,7 +462,7 @@ fun DiscoveryDialog(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable {
-                                                    onSelectIp(device.ip)
+                                                    onSelectDevice(device)
                                                     onDismiss()
                                                 },
                                             shape = RoundedCornerShape(12.dp),
