@@ -7,9 +7,10 @@ import com.app.iot.util.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 import okhttp3.ResponseBody
+import java.net.DatagramPacket
+import java.net.DatagramSocket
+import java.net.InetAddress
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,6 +26,9 @@ class HomeViewModel @Inject constructor(
 
     private val _scanState = MutableStateFlow<UiState<List<String>>>(UiState.Idle)
     val scanState: StateFlow<UiState<List<String>>> = _scanState.asStateFlow()
+
+    private val UDP_PORT = 4210
+    private val DISCOVERY_MESSAGE = "DISCOVER_ESP"
 
     fun controlLed(ipAddress: String, turnOn: Boolean) {
         viewModelScope.launch {
@@ -53,43 +57,51 @@ class HomeViewModel @Inject constructor(
             _scanState.value = UiState.Error("Please connect to WiFi first")
             return
         }
-        
-        val subnet = systemIp.substringBeforeLast(".") + "."
-        
+
         viewModelScope.launch(Dispatchers.IO) {
             _scanState.value = UiState.Loading
-            
-            // Limit parallelism to avoid overwhelming the network stack
-            val semaphore = Semaphore(30)
-            
-            val jobs = (1..254).map { i ->
-                async {
-                    semaphore.withPermit {
-                        val targetIp = subnet + i
-                        try {
-                            // Use a generous timeout for discovery as ESP8266 can be slow
-                            withTimeout(5000) {
-                                val result = homeUseCase.getStatus(targetIp)
-                                    .filter { it !is UiState.Loading }
-                                    .first()
-                                
-                                if (result is UiState.Success) {
-                                    targetIp
-                                } else null
-                            }
-                        } catch (e: Exception) {
-                            null
+            val discovered = mutableSetOf<String>()
+            var socket: DatagramSocket? = null
+
+            try {
+                socket = DatagramSocket()
+                socket.broadcast = true
+                socket.soTimeout = 3000 // Wait 3 seconds for responses
+
+                val sendData = DISCOVERY_MESSAGE.toByteArray()
+                val broadcastAddress = InetAddress.getByName("255.255.255.255")
+                val sendPacket = DatagramPacket(sendData, sendData.size, broadcastAddress, UDP_PORT)
+                
+                socket.send(sendPacket)
+
+                val receiveData = ByteArray(1024)
+                val receivePacket = DatagramPacket(receiveData, receiveData.size)
+
+                val startTime = System.currentTimeMillis()
+                while (System.currentTimeMillis() - startTime < 3000) {
+                    try {
+                        socket.receive(receivePacket)
+                        // The response is JSON, we just need the IP from the packet
+                        val ip = receivePacket.address.hostAddress
+                        if (ip != null) {
+                            discovered.add(ip)
                         }
+                    } catch (e: Exception) {
+                        // Timeout reached or receive failed
+                        break
                     }
                 }
-            }
-            
-            val discovered = jobs.awaitAll().filterNotNull()
-            
-            if (discovered.isEmpty()) {
-                _scanState.value = UiState.Error("No devices found on $subnet*. Check if ESP8266 is on same WiFi.")
-            } else {
-                _scanState.value = UiState.Success(discovered)
+
+                if (discovered.isEmpty()) {
+                    _scanState.value = UiState.Error("No devices found. Check if ESP8266 is on same WiFi.")
+                } else {
+                    _scanState.value = UiState.Success(discovered.toList())
+                }
+
+            } catch (e: Exception) {
+                _scanState.value = UiState.Error("Discovery failed: ${e.localizedMessage}")
+            } finally {
+                socket?.close()
             }
         }
     }
