@@ -77,7 +77,6 @@ import com.app.iot.ui.theme.OnestMedium
 import com.app.iot.ui.theme.OnestRegular
 import com.app.iot.ui.theme.OnestSemiBold
 import com.app.iot.util.UiState
-import java.net.Inet4Address
 
 @Composable
 fun HomeTab(
@@ -96,35 +95,6 @@ fun HomeTab(
     val scanState by viewModel.scanState.collectAsState()
     val devices by viewModel.devices.collectAsState()
 
-    fun updateIpAddress() {
-        val connectivityManager =
-            context.applicationContext
-                .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        val network = connectivityManager.activeNetwork
-
-        if (network == null) {
-            systemIpAddress = "0.0.0.0"
-            return
-        }
-
-        val capabilities = connectivityManager.getNetworkCapabilities(network)
-
-        if (capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) != true) {
-            systemIpAddress = "0.0.0.0"
-            return
-        }
-
-        val linkProperties = connectivityManager.getLinkProperties(network)
-
-        systemIpAddress = linkProperties
-            ?.linkAddresses
-            ?.firstOrNull { it.address is Inet4Address }
-            ?.address
-            ?.hostAddress
-            ?: "0.0.0.0"
-    }
-
     DisposableEffect(context) {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkRequest = NetworkRequest.Builder()
@@ -134,7 +104,7 @@ fun HomeTab(
         val networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 isAppWifiConnected = true
-                updateIpAddress()
+                systemIpAddress = viewModel.getWifiIpAddress()
             }
 
             override fun onLost(network: Network) {
@@ -143,8 +113,7 @@ fun HomeTab(
             }
 
             override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
-                // Update IP in case it changed (e.g. DHCP renewal)
-                updateIpAddress()
+                systemIpAddress = viewModel.getWifiIpAddress()
             }
         }
 
@@ -167,7 +136,7 @@ fun HomeTab(
                 isConnected = isAppWifiConnected,
                 ipAddress = systemIpAddress,
                 isRefreshing = statusState is UiState.Loading,
-                onRefresh = { updateIpAddress() }
+                onRefresh = { systemIpAddress = viewModel.getWifiIpAddress() }
             )
 
             Spacer(modifier = Modifier.height(16.dp))

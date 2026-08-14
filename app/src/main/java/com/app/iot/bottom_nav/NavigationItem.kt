@@ -1,4 +1,4 @@
-package com.app.iot.custom_bottom_navigation
+package com.app.iot.bottom_nav
 
 data class NavigationItem(
     val label: String,

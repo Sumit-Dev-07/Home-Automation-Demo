@@ -1,4 +1,4 @@
-package com.app.iot.custom_bottom_navigation
+package com.app.iot.bottom_nav
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
-import com.app.iot.custom_bottom_navigation.CustomBottomNavigation
+import com.app.iot.bottom_nav.CustomBottomNavigation
 import com.app.iot.ui.features.home.tab.HomeTab
 
 @Composable

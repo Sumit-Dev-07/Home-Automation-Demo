@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.iot.domain.usecase.HomeUseCase
 import com.app.iot.util.UiState
+import com.app.iot.util.WifiConnectivityManager
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -36,7 +37,8 @@ private data class DiscoveryResponse(
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val homeUseCase: HomeUseCase
+    private val homeUseCase: HomeUseCase,
+    private val wifiConnectivityManager: WifiConnectivityManager
 ) : ViewModel() {
 
     private val _ledState = MutableStateFlow<UiState<ResponseBody>>(UiState.Idle)
@@ -225,4 +227,8 @@ class HomeViewModel @Inject constructor(
     fun resetScanState() {
         _scanState.value = UiState.Idle
     }
+
+    fun isWifiConnected(): Boolean = wifiConnectivityManager.isWifiConnected()
+
+    fun getWifiIpAddress(): String = wifiConnectivityManager.getWifiIpAddress()
 }
