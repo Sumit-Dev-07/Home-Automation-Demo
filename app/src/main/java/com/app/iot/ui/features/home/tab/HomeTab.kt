@@ -87,6 +87,7 @@ fun HomeTab(
     val snackbarHostState = remember { SnackbarHostState() }
     var isAppWifiConnected by remember { mutableStateOf(false) }
     var systemIpAddress by remember { mutableStateOf("0.0.0.0") }
+    var wifiSsid by remember { mutableStateOf("") }
     var selectedDeviceIp by remember { mutableStateOf(ApiPath.LOCAL_WIFI_IP_URL) }
     var selectedDeviceName by remember { mutableStateOf("") }
 
@@ -105,15 +106,18 @@ fun HomeTab(
             override fun onAvailable(network: Network) {
                 isAppWifiConnected = true
                 systemIpAddress = viewModel.getWifiIpAddress()
+                wifiSsid = viewModel.getWifiSsid()
             }
 
             override fun onLost(network: Network) {
                 isAppWifiConnected = false
                 systemIpAddress = "0.0.0.0"
+                wifiSsid = ""
             }
 
             override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
                 systemIpAddress = viewModel.getWifiIpAddress()
+                wifiSsid = viewModel.getWifiSsid()
             }
         }
 
@@ -134,9 +138,13 @@ fun HomeTab(
             // App WiFi Status
             WifiStatusHeader(
                 isConnected = isAppWifiConnected,
+                ssid = wifiSsid,
                 ipAddress = systemIpAddress,
                 isRefreshing = statusState is UiState.Loading,
-                onRefresh = { systemIpAddress = viewModel.getWifiIpAddress() }
+                onRefresh = {
+                    systemIpAddress = viewModel.getWifiIpAddress()
+                    wifiSsid = viewModel.getWifiSsid()
+                }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -531,6 +539,7 @@ fun DiscoveryDialog(
 @Composable
 fun WifiStatusHeader(
     isConnected: Boolean,
+    ssid: String,
     ipAddress: String,
     isRefreshing: Boolean,
     onRefresh: () -> Unit
@@ -573,7 +582,7 @@ fun WifiStatusHeader(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = if (isConnected) "System Online " else "System Offline",
+                        text = if (isConnected) (if (ssid.isNotEmpty()) ssid else "System Online") else "System Offline",
                         fontFamily = OnestMedium,
                         fontSize = 14.sp,
                         color = if (isConnected) Color(0xFF2E7D32) else Color(0xFFC62828)

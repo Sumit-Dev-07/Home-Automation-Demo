@@ -3,6 +3,7 @@ package com.app.iot.util
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.wifi.WifiManager
 import java.net.Inet4Address
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -46,5 +47,23 @@ class WifiConnectivityManager @Inject constructor(
             ?.address
             ?.hostAddress
             ?: "0.0.0.0"
+    }
+
+    /**
+     * Returns the SSID of the connected Wi-Fi network.
+     * Note: Requires location permission and location to be enabled on many Android versions.
+     */
+    fun getWifiSsid(): String {
+        val wifiManager = context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+            ?: return "WiFi Connected"
+        
+        val info = wifiManager.connectionInfo
+        val ssid = info.ssid
+        
+        return if (ssid.isNullOrEmpty() || ssid == "<unknown ssid>") {
+            "WiFi Connected"
+        } else {
+            ssid.replace("\"", "")
+        }
     }
 }

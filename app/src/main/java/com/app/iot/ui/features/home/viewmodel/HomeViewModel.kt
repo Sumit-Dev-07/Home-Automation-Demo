@@ -231,4 +231,6 @@ class HomeViewModel @Inject constructor(
     fun isWifiConnected(): Boolean = wifiConnectivityManager.isWifiConnected()
 
     fun getWifiIpAddress(): String = wifiConnectivityManager.getWifiIpAddress()
+
+    fun getWifiSsid(): String = wifiConnectivityManager.getWifiSsid()
 }
