@@ -20,11 +20,11 @@ class WifiConnectivityManager @Inject constructor(
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
             ?: return false
 
-        val activeNetwork = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
-
-        return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) &&
-                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        // Check all networks because a Wi-Fi without internet might not be the "active" network
+        return connectivityManager.allNetworks.any { network ->
+            val capabilities = connectivityManager.getNetworkCapabilities(network)
+            capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+        }
     }
 
     /**
@@ -34,14 +34,13 @@ class WifiConnectivityManager @Inject constructor(
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
             ?: return "0.0.0.0"
 
-        val activeNetwork = connectivityManager.activeNetwork ?: return "0.0.0.0"
-        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return "0.0.0.0"
+        // Find the Wi-Fi network even if it's not the active one
+        val wifiNetwork = connectivityManager.allNetworks.firstOrNull { network ->
+            val capabilities = connectivityManager.getNetworkCapabilities(network)
+            capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true
+        } ?: return "0.0.0.0"
 
-        if (!capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-            return "0.0.0.0"
-        }
-
-        val linkProperties = connectivityManager.getLinkProperties(activeNetwork)
+        val linkProperties = connectivityManager.getLinkProperties(wifiNetwork)
         return linkProperties?.linkAddresses
             ?.firstOrNull { it.address is Inet4Address }
             ?.address

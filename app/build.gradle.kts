@@ -15,7 +15,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.app.iot"
+        applicationId = "com.app.auto"
         minSdk = 28
         targetSdk = 37
         versionCode = 1

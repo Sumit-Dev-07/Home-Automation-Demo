@@ -9,11 +9,11 @@ import javax.inject.Inject
 
 class HomeDataSourceImpl @Inject constructor(private val apiService: ApiService) : HomeDataSource {
     override suspend fun ledOn(): Response<ResponseBody> {
-        return apiService.controlLed("http://${ApiPath.LOCAL_WIFI_IP_URL}/led1on")
+        return apiService.controlLed("http://${ApiPath.LOCAL_WIFI_IP_URL}/ledon")
     }
 
     override suspend fun ledOff(): Response<ResponseBody> {
-        return apiService.controlLed("http://${ApiPath.LOCAL_WIFI_IP_URL}/led1off")
+        return apiService.controlLed("http://${ApiPath.LOCAL_WIFI_IP_URL}/ledoff")
     }
 
     override suspend fun led2On(): Response<ResponseBody> {

@@ -100,17 +100,21 @@ fun HomeTab(
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val networkRequest = NetworkRequest.Builder()
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             .build()
 
         val networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 isAppWifiConnected = true
+                // Force the app to use the Wi-Fi network even if it has no internet
+                connectivityManager.bindProcessToNetwork(network)
                 systemIpAddress = viewModel.getWifiIpAddress()
                 wifiSsid = viewModel.getWifiSsid()
             }
 
             override fun onLost(network: Network) {
                 isAppWifiConnected = false
+                connectivityManager.bindProcessToNetwork(null)
                 systemIpAddress = "0.0.0.0"
                 wifiSsid = ""
             }
