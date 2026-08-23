@@ -17,6 +17,21 @@ interface ApiService {
     ): Response<LoginResponse>
 
     @GET
+    suspend fun getStatus(@Url url: String): Response<ResponseBody>
+
+    @GET
+    suspend fun toggleRelay(@Url url: String): Response<ResponseBody>
+
+    @GET
+    suspend fun addDevice(@Url url: String): Response<ResponseBody>
+
+    @GET
+    suspend fun removeDevice(@Url url: String): Response<ResponseBody>
+
+    @GET
+    suspend fun updateWifi(@Url url: String): Response<ResponseBody>
+
+    @GET
     suspend fun controlLed(@Url url: String): Response<ResponseBody>
 
 }

@@ -30,17 +30,28 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeveloperBoard
 import androidx.compose.material.icons.filled.DeviceThermostat
 import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -62,6 +73,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -77,6 +89,7 @@ import com.app.iot.ui.theme.OnestMedium
 import com.app.iot.ui.theme.OnestRegular
 import com.app.iot.ui.theme.OnestSemiBold
 import com.app.iot.util.UiState
+import okhttp3.ResponseBody
 
 @Composable
 fun HomeTab(
@@ -91,10 +104,16 @@ fun HomeTab(
     var selectedDeviceIp by remember { mutableStateOf(ApiPath.LOCAL_WIFI_IP_URL) }
     var selectedDeviceName by remember { mutableStateOf("") }
 
+    var showAddDeviceDialog by remember { mutableStateOf(false) }
+    var showWifiDialog by remember { mutableStateOf(false) }
+
     val ledState by viewModel.ledState.collectAsState()
     val statusState by viewModel.statusState.collectAsState()
     val scanState by viewModel.scanState.collectAsState()
     val devices by viewModel.devices.collectAsState()
+    val addDeviceState by viewModel.addDeviceState.collectAsState()
+    val updateWifiState by viewModel.updateWifiState.collectAsState()
+    val removeDeviceState by viewModel.removeDeviceState.collectAsState()
 
     DisposableEffect(context) {
         val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -106,7 +125,6 @@ fun HomeTab(
         val networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 isAppWifiConnected = true
-                // Force the app to use the Wi-Fi network even if it has no internet
                 connectivityManager.bindProcessToNetwork(network)
                 systemIpAddress = viewModel.getWifiIpAddress()
                 wifiSsid = viewModel.getWifiSsid()
@@ -139,7 +157,6 @@ fun HomeTab(
                 .padding(modifier)
                 .padding(16.dp)
         ) {
-            // App WiFi Status
             WifiStatusHeader(
                 isConnected = isAppWifiConnected,
                 ssid = wifiSsid,
@@ -148,7 +165,8 @@ fun HomeTab(
                 onRefresh = {
                     systemIpAddress = viewModel.getWifiIpAddress()
                     wifiSsid = viewModel.getWifiSsid()
-                }
+                },
+                onSettingsClick = { showWifiDialog = true }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -176,14 +194,27 @@ fun HomeTab(
                     DeviceItem(
                         device = device,
                         onCheckedChange = { isChecked ->
-                            // Trigger API call for Light (LED)
                             if (isAppWifiConnected) {
                                 viewModel.controlLed(device.id, isChecked)
                             }
+                        },
+                        onDelete = {
+                            viewModel.removeDevice(device.name)
                         }
                     )
                 }
             }
+        }
+
+        FloatingActionButton(
+            onClick = { showAddDeviceDialog = true },
+            containerColor = Color(0xFFE64A19),
+            contentColor = Color.White,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(top = 24.dp, end = 24.dp, start = 24.dp, bottom = 160.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Add Device")
         }
 
         SnackbarHost(
@@ -191,14 +222,12 @@ fun HomeTab(
             modifier = Modifier.align(Alignment.BottomCenter)
         )
 
-        // Error handling
         LaunchedEffect(ledState) {
             if (ledState is UiState.Error) {
                 snackbarHostState.showSnackbar((ledState as UiState.Error).message)
             }
         }
 
-        // Fetch status when IP is available
         LaunchedEffect(systemIpAddress) {
             if (systemIpAddress != "0.0.0.0" && isAppWifiConnected) {
                 viewModel.fetchStatus()
@@ -218,6 +247,61 @@ fun HomeTab(
                 }
             )
         }
+
+        if (showAddDeviceDialog) {
+            AddDeviceDialog(
+                state = addDeviceState,
+                onDismiss = {
+                    showAddDeviceDialog = false
+                    viewModel.resetActionStates()
+                },
+                onAdd = { name, pin, syncPin ->
+                    viewModel.addDevice(name, pin, syncPin)
+                }
+            )
+        }
+
+        if (showWifiDialog) {
+            WifiConfigDialog(
+                state = updateWifiState,
+                onDismiss = {
+                    showWifiDialog = false
+                    viewModel.resetActionStates()
+                },
+                onUpdate = { password ->
+                    viewModel.updateWifi(password)
+                }
+            )
+        }
+
+        LaunchedEffect(addDeviceState) {
+            if (addDeviceState is UiState.Success) {
+                snackbarHostState.showSnackbar("Device added successfully")
+                showAddDeviceDialog = false
+                viewModel.resetActionStates()
+            } else if (addDeviceState is UiState.Error) {
+                snackbarHostState.showSnackbar((addDeviceState as UiState.Error).message)
+            }
+        }
+
+        LaunchedEffect(updateWifiState) {
+            if (updateWifiState is UiState.Success) {
+                snackbarHostState.showSnackbar("WiFi password updated. Device will restart.")
+                showWifiDialog = false
+                viewModel.resetActionStates()
+            } else if (updateWifiState is UiState.Error) {
+                snackbarHostState.showSnackbar((updateWifiState as UiState.Error).message)
+            }
+        }
+
+        LaunchedEffect(removeDeviceState) {
+            if (removeDeviceState is UiState.Success) {
+                snackbarHostState.showSnackbar("Device removed successfully")
+                viewModel.resetActionStates()
+            } else if (removeDeviceState is UiState.Error) {
+                snackbarHostState.showSnackbar((removeDeviceState as UiState.Error).message)
+            }
+        }
     }
 }
 
@@ -233,7 +317,6 @@ fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
             .height(80.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Outer layer (Glow/Border effect)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -246,7 +329,6 @@ fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
                 )
         )
 
-        // Main Card
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -310,7 +392,6 @@ fun FindDevicesCard(onFind: () -> Unit) {
             .height(100.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Outer layer (Glow/Border effect)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -323,7 +404,6 @@ fun FindDevicesCard(onFind: () -> Unit) {
                 )
         )
 
-        // Main Card
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -401,7 +481,6 @@ fun DiscoveryDialog(
                 .wrapContentHeight(),
             contentAlignment = Alignment.Center
         ) {
-            // Outer layer (Glow/Border effect)
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -414,7 +493,6 @@ fun DiscoveryDialog(
                     )
             )
 
-            // Main Card
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -513,7 +591,7 @@ fun DiscoveryDialog(
                                     fontFamily = OnestRegular,
                                     fontSize = 14.sp,
                                     color = Color(0xFFF44336),
-                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    textAlign = TextAlign.Center
                                 )
                             }
 
@@ -546,22 +624,18 @@ fun WifiStatusHeader(
     ssid: String,
     ipAddress: String,
     isRefreshing: Boolean,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
-    val outerCornerRadius = 24.dp
     val innerCornerRadius = 20.dp
-    val gap = 6.dp
 
     Box(
         modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-
-        // Main Card (White background like bottom nav inner bar)
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                //.padding(gap)
                 .clip(RoundedCornerShape(innerCornerRadius)),
             color = Color.White
         ) {
@@ -603,6 +677,16 @@ fun WifiStatusHeader(
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
+                if (isConnected) {
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(
+                            Icons.Default.Settings,
+                            contentDescription = "WiFi Settings",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
                 if (!isConnected) {
                     TextButton(
                         onClick = onRefresh,
@@ -624,7 +708,8 @@ fun WifiStatusHeader(
 @Composable
 fun DeviceItem(
     device: DeviceStatus,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
+    onDelete: () -> Unit
 ) {
     val outerCornerRadius = 24.dp
     val innerCornerRadius = 20.dp
@@ -643,7 +728,6 @@ fun DeviceItem(
             .height(170.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Outer layer (Glow/Border effect like bottom nav)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -656,7 +740,6 @@ fun DeviceItem(
                 )
         )
 
-        // Main Card (White background like bottom nav inner bar)
         Surface(
             modifier = Modifier
                 .fillMaxSize()
@@ -675,14 +758,28 @@ fun DeviceItem(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = if (device.isOn && device.isConnected) Color(0xFFE64A19)
-                        else if (!device.isConnected) Color(0xFFF44336)
-                        else Color(0xFF9E9E9E),
-                        modifier = Modifier.size(28.dp)
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = if (device.isOn && device.isConnected) Color(0xFFE64A19)
+                            else if (!device.isConnected) Color(0xFFF44336)
+                            else Color(0xFF9E9E9E),
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        IconButton(
+                            onClick = onDelete,
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Delete,
+                                contentDescription = "Delete",
+                                tint = Color.LightGray.copy(alpha = 0.5f),
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
                     Switch(
                         checked = device.isOn,
                         onCheckedChange = onCheckedChange,
@@ -733,6 +830,276 @@ fun DeviceItem(
                         color = if (device.isOn && device.isConnected) Color(0xFFE64A19)
                         else Color(0xFF9E9E9E)
                     )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddDeviceDialog(
+    state: UiState<ResponseBody>,
+    onDismiss: () -> Unit,
+    onAdd: (String, String, String?) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    var pin by remember { mutableStateOf("D1") }
+    var syncPin by remember { mutableStateOf("None") }
+    val pins = listOf("D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8")
+    val syncPins = listOf("None") + pins
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        val outerCornerRadius = 24.dp
+        val innerCornerRadius = 20.dp
+        val gap = 6.dp
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .wrapContentHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(outerCornerRadius))
+                    .background(Color.Black.copy(alpha = 0.05f))
+                    .border(1.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(outerCornerRadius))
+            )
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(gap)
+                    .clip(RoundedCornerShape(innerCornerRadius)),
+                color = Color.White
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Add New Device",
+                        fontFamily = OnestBold,
+                        fontSize = 20.sp,
+                        color = Color(0xFF212121)
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    OutlinedTextField(
+                        value = name,
+                        onValueChange = { name = it },
+                        label = { Text("Device Name", fontFamily = OnestRegular) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFFE64A19),
+                            focusedLabelColor = Color(0xFFE64A19)
+                        ),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    PinDropdown(
+                        label = "Select Pin",
+                        selectedPin = pin,
+                        pins = pins,
+                        onPinSelected = { pin = it }
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    PinDropdown(
+                        label = "Sync Pin (Optional)",
+                        selectedPin = syncPin,
+                        pins = syncPins,
+                        onPinSelected = { syncPin = it }
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    if (state is UiState.Loading) {
+                        CircularProgressIndicator(color = Color(0xFFE64A19))
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(onClick = onDismiss) {
+                                Text("Cancel", color = Color.Gray, fontFamily = OnestMedium)
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                onClick = {
+                                    onAdd(
+                                        name,
+                                        pin,
+                                        if (syncPin == "None") null else syncPin
+                                    )
+                                },
+                                enabled = name.isNotBlank(),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE64A19)),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text("Add Device", fontFamily = OnestMedium)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PinDropdown(
+    label: String,
+    selectedPin: String,
+    pins: List<String>,
+    onPinSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = selectedPin,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label, fontFamily = OnestRegular) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color(0xFFE64A19),
+                focusedLabelColor = Color(0xFFE64A19)
+            )
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            pins.forEach { p ->
+                DropdownMenuItem(
+                    text = { Text(p, fontFamily = OnestRegular) },
+                    onClick = {
+                        onPinSelected(p)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun WifiConfigDialog(
+    state: UiState<ResponseBody>,
+    onDismiss: () -> Unit,
+    onUpdate: (String) -> Unit
+) {
+    var password by remember { mutableStateOf("") }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        val outerCornerRadius = 24.dp
+        val innerCornerRadius = 20.dp
+        val gap = 6.dp
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.9f)
+                .wrapContentHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(outerCornerRadius))
+                    .background(Color.Black.copy(alpha = 0.05f))
+                    .border(1.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(outerCornerRadius))
+            )
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(gap)
+                    .clip(RoundedCornerShape(innerCornerRadius)),
+                color = Color.White
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "WiFi Configuration",
+                        fontFamily = OnestBold,
+                        fontSize = 20.sp,
+                        color = Color(0xFF212121)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Enter new WiFi password. The device will restart and connect to current SSID with this password.",
+                        fontFamily = OnestRegular,
+                        fontSize = 12.sp,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text("New WiFi Password", fontFamily = OnestRegular) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = Color(0xFFE64A19),
+                            focusedLabelColor = Color(0xFFE64A19)
+                        ),
+                        singleLine = true
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    if (state is UiState.Loading) {
+                        CircularProgressIndicator(color = Color(0xFFE64A19))
+                    } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            TextButton(onClick = onDismiss) {
+                                Text("Cancel", color = Color.Gray, fontFamily = OnestMedium)
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Button(
+                                onClick = { onUpdate(password) },
+                                enabled = password.length >= 8,
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE64A19)),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text("Update", fontFamily = OnestMedium)
+                            }
+                        }
+                    }
                 }
             }
         }

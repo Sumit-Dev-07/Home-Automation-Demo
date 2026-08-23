@@ -8,11 +8,25 @@ import javax.inject.Inject
 
 class HomeDataSourceImpl @Inject constructor(private val apiService: ApiService) : HomeDataSource {
     override suspend fun toggleRelay(name: String, isOn: Boolean): Response<ResponseBody> {
-        val action = if (isOn) "on" else "off"
-        return apiService.controlLed("http://${ApiPath.LOCAL_WIFI_IP_URL}/relay/$action?relay=$name")
+        val status = if (isOn) "ON" else "OFF"
+        return apiService.toggleRelay("http://${ApiPath.LOCAL_WIFI_IP_URL}/relay/toggle?relay=$name&status=$status")
     }
 
     override suspend fun getStatus(): Response<ResponseBody> {
-        return apiService.controlLed("http://${ApiPath.LOCAL_WIFI_IP_URL}/status")
+        return apiService.getStatus("http://${ApiPath.LOCAL_WIFI_IP_URL}/status")
+    }
+
+    override suspend fun addDevice(name: String, pin: String, syncPin: String?): Response<ResponseBody> {
+        val url = "http://${ApiPath.LOCAL_WIFI_IP_URL}/device/add?name=$name&pin=$pin" +
+                if (syncPin != null) "&syncPin=$syncPin" else ""
+        return apiService.addDevice(url)
+    }
+
+    override suspend fun removeDevice(name: String): Response<ResponseBody> {
+        return apiService.removeDevice("http://${ApiPath.LOCAL_WIFI_IP_URL}/device/remove?name=$name")
+    }
+
+    override suspend fun updateWifi(password: String): Response<ResponseBody> {
+        return apiService.updateWifi("http://${ApiPath.LOCAL_WIFI_IP_URL}/wifi/update?password=$password")
     }
 }

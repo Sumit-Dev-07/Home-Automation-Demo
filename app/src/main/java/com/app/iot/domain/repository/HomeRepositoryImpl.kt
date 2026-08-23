@@ -27,4 +27,29 @@ class HomeRepositoryImpl @Inject constructor(
             emit(result)
         }.flowOn(dispatchersProvider.io())
     }
+
+    override suspend fun addDevice(
+        name: String,
+        pin: String,
+        syncPin: String?
+    ): Flow<ApiState<ResponseBody>> {
+        return flow {
+            val result = safeApiCall { homeDataSource.addDevice(name, pin, syncPin) }
+            emit(result)
+        }.flowOn(dispatchersProvider.io())
+    }
+
+    override suspend fun removeDevice(name: String): Flow<ApiState<ResponseBody>> {
+        return flow {
+            val result = safeApiCall { homeDataSource.removeDevice(name) }
+            emit(result)
+        }.flowOn(dispatchersProvider.io())
+    }
+
+    override suspend fun updateWifi(password: String): Flow<ApiState<ResponseBody>> {
+        return flow {
+            val result = safeApiCall { homeDataSource.updateWifi(password) }
+            emit(result)
+        }.flowOn(dispatchersProvider.io())
+    }
 }

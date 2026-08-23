@@ -28,4 +28,34 @@ class HomeUseCase @Inject constructor(private val homeRepository: HomeRepository
             }
         }
     }
+
+    suspend fun addDevice(name: String, pin: String, syncPin: String?): Flow<UiState<ResponseBody>> {
+        return homeRepository.addDevice(name, pin, syncPin).map { result ->
+            when (result) {
+                is ApiState.Loading -> UiState.Loading
+                is ApiState.Success -> UiState.Success(result.data)
+                is ApiState.Error -> UiState.Error(result.message)
+            }
+        }
+    }
+
+    suspend fun removeDevice(name: String): Flow<UiState<ResponseBody>> {
+        return homeRepository.removeDevice(name).map { result ->
+            when (result) {
+                is ApiState.Loading -> UiState.Loading
+                is ApiState.Success -> UiState.Success(result.data)
+                is ApiState.Error -> UiState.Error(result.message)
+            }
+        }
+    }
+
+    suspend fun updateWifi(password: String): Flow<UiState<ResponseBody>> {
+        return homeRepository.updateWifi(password).map { result ->
+            when (result) {
+                is ApiState.Loading -> UiState.Loading
+                is ApiState.Success -> UiState.Success(result.data)
+                is ApiState.Error -> UiState.Error(result.message)
+            }
+        }
+    }
 }

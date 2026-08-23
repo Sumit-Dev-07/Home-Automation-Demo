@@ -50,6 +50,15 @@ class HomeViewModel @Inject constructor(
     private val _scanState = MutableStateFlow<UiState<List<DiscoveredDevice>>>(UiState.Idle)
     val scanState: StateFlow<UiState<List<DiscoveredDevice>>> = _scanState.asStateFlow()
 
+    private val _addDeviceState = MutableStateFlow<UiState<ResponseBody>>(UiState.Idle)
+    val addDeviceState: StateFlow<UiState<ResponseBody>> = _addDeviceState.asStateFlow()
+
+    private val _removeDeviceState = MutableStateFlow<UiState<ResponseBody>>(UiState.Idle)
+    val removeDeviceState: StateFlow<UiState<ResponseBody>> = _removeDeviceState.asStateFlow()
+
+    private val _updateWifiState = MutableStateFlow<UiState<ResponseBody>>(UiState.Idle)
+    val updateWifiState: StateFlow<UiState<ResponseBody>> = _updateWifiState.asStateFlow()
+
     private val _devices = MutableStateFlow<List<DeviceStatus>>(emptyList())
     val devices: StateFlow<List<DeviceStatus>> = _devices.asStateFlow()
 
@@ -87,6 +96,51 @@ class HomeViewModel @Inject constructor(
                     }
                 }
         }
+    }
+
+    fun addDevice(name: String, pin: String, syncPin: String?) {
+        viewModelScope.launch {
+            homeUseCase.addDevice(name, pin, syncPin)
+                .onStart { _addDeviceState.value = UiState.Loading }
+                .catch { error -> _addDeviceState.value = UiState.Error("${error.localizedMessage}") }
+                .collect { result ->
+                    _addDeviceState.value = result
+                    if (result is UiState.Success) {
+                        fetchStatus()
+                    }
+                }
+        }
+    }
+
+    fun removeDevice(name: String) {
+        viewModelScope.launch {
+            homeUseCase.removeDevice(name)
+                .onStart { _removeDeviceState.value = UiState.Loading }
+                .catch { error -> _removeDeviceState.value = UiState.Error("${error.localizedMessage}") }
+                .collect { result ->
+                    _removeDeviceState.value = result
+                    if (result is UiState.Success) {
+                        fetchStatus()
+                    }
+                }
+        }
+    }
+
+    fun updateWifi(password: String) {
+        viewModelScope.launch {
+            homeUseCase.updateWifi(password)
+                .onStart { _updateWifiState.value = UiState.Loading }
+                .catch { error -> _updateWifiState.value = UiState.Error("${error.localizedMessage}") }
+                .collect { result ->
+                    _updateWifiState.value = result
+                }
+        }
+    }
+
+    fun resetActionStates() {
+        _addDeviceState.value = UiState.Idle
+        _removeDeviceState.value = UiState.Idle
+        _updateWifiState.value = UiState.Idle
     }
 
     private fun parseStatusResponse(jsonString: String) {
