@@ -151,6 +151,7 @@ class HomeViewModel @Inject constructor(
             val newList = mutableListOf<DeviceStatus>()
 
             // Parse relays array from ESP firmware
+            val hasRelays = json.has("relays")
             val relaysArray = json.optJSONArray("relays")
             if (relaysArray != null) {
                 for (i in 0 until relaysArray.length()) {
@@ -168,8 +169,8 @@ class HomeViewModel @Inject constructor(
                 }
             }
 
-            if (newList.isEmpty()) {
-                // Fallback for single relay devices
+            if (newList.isEmpty() && !hasRelays) {
+                // Fallback for single relay devices (older firmware without relays array)
                 val deviceName = json.optString("device", "ESP Device")
                 val status = json.optString("status", "OFF")
                 newList.add(

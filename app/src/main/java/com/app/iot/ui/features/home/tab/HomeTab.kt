@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
@@ -50,6 +51,7 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SnackbarHost
@@ -190,18 +192,48 @@ fun HomeTab(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(devices) { device ->
-                    DeviceItem(
-                        device = device,
-                        onCheckedChange = { isChecked ->
-                            if (isAppWifiConnected) {
-                                viewModel.controlLed(device.id, isChecked)
-                            }
-                        },
-                        onDelete = {
-                            viewModel.removeDevice(device.name)
+                if (devices.isEmpty()) {
+                    item(span = { GridItemSpan(2) }) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 48.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DeveloperBoard,
+                                contentDescription = null,
+                                modifier = Modifier.size(80.dp),
+                                tint = Color.White
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "No devices found",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "Tap to add a device",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White
+                            )
                         }
-                    )
+                    }
+                } else {
+                    items(devices) { device ->
+                        DeviceItem(
+                            device = device,
+                            onCheckedChange = { isChecked ->
+                                if (isAppWifiConnected) {
+                                    viewModel.controlLed(device.id, isChecked)
+                                }
+                            },
+                            onDelete = {
+                                viewModel.removeDevice(device.name)
+                            }
+                        )
+                    }
                 }
             }
         }
