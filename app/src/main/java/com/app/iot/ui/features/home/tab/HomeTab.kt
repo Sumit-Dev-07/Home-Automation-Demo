@@ -83,6 +83,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.app.iot.R
 import com.app.iot.data.ApiPath
+import com.app.iot.ui.features.home.tab.components.WifiStatusHeader
 import com.app.iot.ui.features.home.viewmodel.DeviceStatus
 import com.app.iot.ui.features.home.viewmodel.DiscoveredDevice
 import com.app.iot.ui.features.home.viewmodel.HomeViewModel
@@ -650,92 +651,7 @@ fun DiscoveryDialog(
     }
 }
 
-@Composable
-fun WifiStatusHeader(
-    isConnected: Boolean,
-    ssid: String,
-    ipAddress: String,
-    isRefreshing: Boolean,
-    onRefresh: () -> Unit,
-    onSettingsClick: () -> Unit
-) {
-    val innerCornerRadius = 20.dp
 
-    Box(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
-    ) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(innerCornerRadius)),
-            color = Color.White
-        ) {
-            Row(
-                modifier = Modifier.padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (isRefreshing) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        strokeWidth = 2.dp,
-                        color = Color(0xFF4CAF50)
-                    )
-                } else {
-                    Icon(
-                        imageVector = if (isConnected) Icons.Default.Wifi else Icons.Default.WifiOff,
-                        contentDescription = null,
-                        tint = if (isConnected) Color(0xFF4CAF50) else Color(0xFFF44336),
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = if (isConnected) (if (ssid.isNotEmpty()) ssid else "System Online") else "System Offline",
-                        fontFamily = OnestMedium,
-                        fontSize = 14.sp,
-                        color = if (isConnected) Color(0xFF2E7D32) else Color(0xFFC62828)
-                    )
-                    if (isConnected) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "IP: $ipAddress",
-                                fontFamily = OnestRegular,
-                                fontSize = 11.sp,
-                                color = Color.Gray
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                if (isConnected) {
-                    IconButton(onClick = onSettingsClick) {
-                        Icon(
-                            Icons.Default.Settings,
-                            contentDescription = "WiFi Settings",
-                            tint = Color.Gray,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-                if (!isConnected) {
-                    TextButton(
-                        onClick = onRefresh,
-                        contentPadding = PaddingValues(horizontal = 8.dp)
-                    ) {
-                        Text(
-                            text = "Connect",
-                            fontFamily = OnestSemiBold,
-                            fontSize = 12.sp,
-                            color = Color(0xFFC62828)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 fun DeviceItem(
@@ -800,17 +716,6 @@ fun DeviceItem(
                             modifier = Modifier.size(28.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        IconButton(
-                            onClick = onDelete,
-                            modifier = Modifier.size(24.dp)
-                        ) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = "Delete",
-                                tint = Color.LightGray.copy(alpha = 0.5f),
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
                     }
                     Switch(
                         checked = device.isOn,
@@ -826,42 +731,59 @@ fun DeviceItem(
                         )
                     )
                 }
-
-                Column {
-                    Text(
-                        text = device.name,
-                        fontFamily = OnestSemiBold,
-                        fontSize = 15.sp,
-                        color = if (!device.isConnected) Color(0xFFC62828) else Color(0xFF212121)
-                    )
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(vertical = 2.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .background(
-                                    color = if (device.isConnected) Color(0xFF4CAF50) else Color(0xFFF44336),
-                                    shape = RoundedCornerShape(50)
-                                )
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
                         Text(
-                            text = if (device.isConnected) "Active" else "Inactive",
-                            fontFamily = OnestRegular,
-                            fontSize = 10.sp,
-                            color = if (device.isConnected) Color(0xFF4CAF50) else Color(0xFFF44336)
+                            text = device.name,
+                            fontFamily = OnestSemiBold,
+                            fontSize = 15.sp,
+                            color = if (!device.isConnected) Color(0xFFC62828) else Color(0xFF212121)
+                        )
+                        
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(vertical = 2.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .background(
+                                        color = if (device.isConnected) Color(0xFF4CAF50) else Color(0xFFF44336),
+                                        shape = RoundedCornerShape(50)
+                                    )
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = if (device.isConnected) "Active" else "Inactive",
+                                fontFamily = OnestRegular,
+                                fontSize = 10.sp,
+                                color = if (device.isConnected) Color(0xFF4CAF50) else Color(0xFFF44336)
+                            )
+                        }
+                        Text(
+                            text = if (device.isOn) "On" else "Off",
+                            fontFamily = OnestMedium,
+                            fontSize = 13.sp,
+                            color = if (device.isOn && device.isConnected) Color(0xFFE64A19)
+                            else Color(0xFF9E9E9E)
                         )
                     }
-                    Text(
-                        text = if (device.isOn) "On" else "Off",
-                        fontFamily = OnestMedium,
-                        fontSize = 13.sp,
-                        color = if (device.isOn && device.isConnected) Color(0xFFE64A19)
-                        else Color(0xFF9E9E9E)
-                    )
+                    IconButton(
+                        onClick = onDelete,
+                        modifier = Modifier.size(24.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            tint = Color.Red.copy(alpha = 0.8f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
         }
