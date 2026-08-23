@@ -9,38 +9,8 @@ import okhttp3.ResponseBody
 import javax.inject.Inject
 
 class HomeUseCase @Inject constructor(private val homeRepository: HomeRepository) {
-    suspend fun ledOn(): Flow<UiState<ResponseBody>> {
-        return homeRepository.ledOn().map { result ->
-            when (result) {
-                is ApiState.Loading -> UiState.Loading
-                is ApiState.Success -> UiState.Success(result.data)
-                is ApiState.Error -> UiState.Error(result.message)
-            }
-        }
-    }
-
-    suspend fun ledOff(): Flow<UiState<ResponseBody>> {
-        return homeRepository.ledOff().map { result ->
-            when (result) {
-                is ApiState.Loading -> UiState.Loading
-                is ApiState.Success -> UiState.Success(result.data)
-                is ApiState.Error -> UiState.Error(result.message)
-            }
-        }
-    }
-
-    suspend fun led2On(): Flow<UiState<ResponseBody>> {
-        return homeRepository.led2On().map { result ->
-            when (result) {
-                is ApiState.Loading -> UiState.Loading
-                is ApiState.Success -> UiState.Success(result.data)
-                is ApiState.Error -> UiState.Error(result.message)
-            }
-        }
-    }
-
-    suspend fun led2Off(): Flow<UiState<ResponseBody>> {
-        return homeRepository.led2Off().map { result ->
+    suspend fun toggleRelay(name: String, isOn: Boolean): Flow<UiState<ResponseBody>> {
+        return homeRepository.toggleRelay(name, isOn).map { result ->
             when (result) {
                 is ApiState.Loading -> UiState.Loading
                 is ApiState.Success -> UiState.Success(result.data)

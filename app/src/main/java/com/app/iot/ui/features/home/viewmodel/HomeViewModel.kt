@@ -57,13 +57,10 @@ class HomeViewModel @Inject constructor(
     private val DISCOVERY_MESSAGE = "DISCOVER_ESP"
 
     fun controlLed(id: Int, turnOn: Boolean) {
+        val device = _devices.value.find { it.id == id } ?: return
         viewModelScope.launch {
-            val call = when (id) {
-                1 -> if (turnOn) homeUseCase.ledOn() else homeUseCase.ledOff()
-                2 -> if (turnOn) homeUseCase.led2On() else homeUseCase.led2Off()
-                else -> if (turnOn) homeUseCase.ledOn() else homeUseCase.ledOff()
-            }
-            call.onStart { _ledState.value = UiState.Loading }
+            homeUseCase.toggleRelay(device.name, turnOn)
+                .onStart { _ledState.value = UiState.Loading }
                 .catch { error -> _ledState.value = UiState.Error("${error.localizedMessage}") }
                 .collect { result ->
                     _ledState.value = result
@@ -95,38 +92,11 @@ class HomeViewModel @Inject constructor(
     private fun parseStatusResponse(jsonString: String) {
         try {
             val json = JSONObject(jsonString)
-            val deviceName = json.optString("device", "ESP Device")
             val ip = json.optString("ip", "")
 
             val newList = mutableListOf<DeviceStatus>()
 
-            if (json.has("led1")) {
-                newList.add(
-                    DeviceStatus(
-                        id = 1,
-                        name = "Light 1",
-                        isOn = json.optString("led1") == "ON",
-                        isConnected = true,
-                        ipAddress = ip,
-                        iconType = "light"
-                    )
-                )
-            }
-
-            if (json.has("led2")) {
-                newList.add(
-                    DeviceStatus(
-                        id = 2,
-                        name = "Light 2",
-                        isOn = json.optString("led2") == "ON",
-                        isConnected = true,
-                        ipAddress = ip,
-                        iconType = "light"
-                    )
-                )
-            }
-
-            // Check if there are multiple relays (keeping old logic just in case)
+            // Parse relays array from ESP firmware
             val relaysArray = json.optJSONArray("relays")
             if (relaysArray != null) {
                 for (i in 0 until relaysArray.length()) {
@@ -138,20 +108,21 @@ class HomeViewModel @Inject constructor(
                             isOn = relayJson.optString("status", "OFF") == "ON",
                             isConnected = true,
                             ipAddress = ip,
-                            iconType = relayJson.optString("type", "light")
+                            iconType = "light"
                         )
                     )
                 }
             }
 
             if (newList.isEmpty()) {
+                // Fallback for single relay devices
+                val deviceName = json.optString("device", "ESP Device")
                 val status = json.optString("status", "OFF")
-                val isOn = status == "ON"
                 newList.add(
                     DeviceStatus(
                         id = 1,
                         name = deviceName,
-                        isOn = isOn,
+                        isOn = status == "ON",
                         isConnected = true,
                         ipAddress = ip,
                         iconType = "light"

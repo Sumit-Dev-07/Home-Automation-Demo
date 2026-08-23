@@ -3,80 +3,122 @@
 #include <WiFiUdp.h>
 
 // =========================
-// Wi-Fi Hotspot (AP) Configuration
+// Access Point Configuration
 // =========================
 
-const char* AP_SSID     = "ESP8266-IoT";   // Name your phone will see
-const char* AP_PASSWORD = "esp12345678";   // Must be 8+ characters, or "" for open network
+namespace Config {
+  constexpr char AP_SSID[]     = "ESP8266-IoT";
+  constexpr char AP_PASSWORD[] = "esp12345678";   // 8+ chars, or "" for open network
 
-IPAddress local_IP(192, 168, 4, 1);
-IPAddress gateway(192, 168, 4, 1);
-IPAddress subnet(255, 255, 255, 0);
+  const IPAddress LOCAL_IP(192, 168, 4, 1);
+  const IPAddress GATEWAY(192, 168, 4, 1);
+  const IPAddress SUBNET(255, 255, 255, 0);
+
+  constexpr char DEVICE_NAME[]  = "ESP8266-01";
+  constexpr uint16_t HTTP_PORT  = 80;
+  constexpr uint16_t UDP_PORT   = 4210;
+}
 
 // =========================
-// Device Configuration
+// Relay/Channel Definition
 // =========================
 
-const char* DEVICE_NAME = "ESP8266-01";
+struct Relay {
+  const char* name;
+  uint8_t pin;
+  bool activeLow;
+  bool state;
+};
 
-constexpr uint8_t LED_PIN = D4;
-constexpr uint16_t HTTP_PORT = 80;
-constexpr uint16_t UDP_PORT = 4210;
+Relay relays[] = {
+  { "relay1", D4, true, false },
+  { "relay2", D5, true, false }
+};
 
-ESP8266WebServer server(HTTP_PORT);
+constexpr size_t RELAY_COUNT = sizeof(relays) / sizeof(relays[0]);
+
+ESP8266WebServer server(Config::HTTP_PORT);
 WiFiUDP udp;
-
-bool ledStatus = false;
 char udpBuffer[128];
 
 // =========================
-// LED
+// Relay Control
 // =========================
 
-void setLed(bool state) {
-  ledStatus = state;
-  digitalWrite(LED_PIN, state ? LOW : HIGH); // active LOW
-  Serial.print("LED: ");
-  Serial.println(state ? "ON" : "OFF");
+void applyRelayState(Relay& relay) {
+  digitalWrite(relay.pin, relay.state ^ relay.activeLow ? HIGH : LOW);
+}
+
+void setRelay(Relay& relay, bool state) {
+  relay.state = state;
+  applyRelayState(relay);
+
+  Serial.printf("[Relay] %s -> %s\n", relay.name, state ? "ON" : "OFF");
+}
+
+int findRelayIndex(const String& name) {
+  for (size_t i = 0; i < RELAY_COUNT; i++) {
+    if (name.equalsIgnoreCase(relays[i].name)) {
+      return static_cast<int>(i);
+    }
+  }
+  return -1;
+}
+
+// =========================
+// JSON Helpers
+// =========================
+
+String buildStatusJson() {
+  String json = "{";
+  json += "\"device\":\"" + String(Config::DEVICE_NAME) + "\",";
+  json += "\"ip\":\"" + WiFi.softAPIP().toString() + "\",";
+  json += "\"chipId\":\"" + String(ESP.getChipId(), HEX) + "\",";
+  json += "\"relays\":[";
+
+  for (size_t i = 0; i < RELAY_COUNT; i++) {
+    json += "{\"name\":\"" + String(relays[i].name) + "\",";
+    json += "\"status\":\"" + String(relays[i].state ? "ON" : "OFF") + "\"}";
+    if (i < RELAY_COUNT - 1) json += ",";
+  }
+
+  json += "]}";
+  return json;
+}
+
+void sendJson(int code, const String& body) {
+  server.send(code, "application/json", body);
 }
 
 // =========================
 // HTTP Handlers
 // =========================
 
-void handleRoot() {
-  // Simple webpage so you can control it from a browser too
-  String html = "<html><body style='font-family:sans-serif;text-align:center;margin-top:50px'>";
-  html += "<h2>" + String(DEVICE_NAME) + "</h2>";
-  html += "<p>Status: <b>" + String(ledStatus ? "ON" : "OFF") + "</b></p>";
-  html += "<a href='/ledon'><button style='padding:15px 30px;font-size:18px'>Turn ON</button></a> ";
-  html += "<a href='/ledoff'><button style='padding:15px 30px;font-size:18px'>Turn OFF</button></a>";
-  html += "</body></html>";
-  server.send(200, "text/html", html);
-}
-
 void handleStatus() {
-  String response = "{";
-  response += "\"device\":\"" + String(DEVICE_NAME) + "\",";
-  response += "\"ip\":\"" + WiFi.softAPIP().toString() + "\",";
-  response += "\"chipId\":\"" + String(ESP.getChipId(), HEX) + "\",";
-  response += "\"status\":\"" + String(ledStatus ? "ON" : "OFF") + "\"";
-  response += "}";
-  server.send(200, "application/json", response);
+  sendJson(200, buildStatusJson());
 }
 
-void handleLedOn() {
-  setLed(true);
-  server.send(200, "application/json", "{\"status\":\"ON\"}");
+void handleRelaySet(bool turnOn) {
+  if (!server.hasArg("relay")) {
+    sendJson(400, "{\"error\":\"Missing 'relay' parameter\"}");
+    return;
+  }
+
+  int idx = findRelayIndex(server.arg("relay"));
+  if (idx < 0) {
+    sendJson(404, "{\"error\":\"Unknown relay\"}");
+    return;
+  }
+
+  setRelay(relays[idx], turnOn);
+  sendJson(200, buildStatusJson());
 }
 
-void handleLedOff() {
-  setLed(false);
-  server.send(200, "application/json", "{\"status\":\"OFF\"}");
-}
+void handleRelayOn()  { handleRelaySet(true); }
+void handleRelayOff() { handleRelaySet(false); }
 
 void handleNotFound() {
-  server.send(404, "application/json", "{\"error\":\"Not found\"}");
+  sendJson(404, "{\"error\":\"Not found\"}");
 }
 
 // =========================
@@ -84,19 +126,13 @@ void handleNotFound() {
 // =========================
 
 void sendDiscoveryResponse(IPAddress remoteIP, uint16_t remotePort) {
-  String response = "{";
-  response += "\"device\":\"" + String(DEVICE_NAME) + "\",";
-  response += "\"ip\":\"" + WiFi.softAPIP().toString() + "\",";
-  response += "\"port\":" + String(HTTP_PORT) + ",";
-  response += "\"chipId\":\"" + String(ESP.getChipId(), HEX) + "\",";
-  response += "\"status\":\"" + String(ledStatus ? "ON" : "OFF") + "\"";
-  response += "}";
+  String response = buildStatusJson();
 
   udp.beginPacket(remoteIP, remotePort);
   udp.write(response.c_str());
   udp.endPacket();
 
-  Serial.print("Discovery response sent to: ");
+  Serial.print("[UDP] Discovery response sent to: ");
   Serial.println(remoteIP);
 }
 
@@ -109,12 +145,10 @@ void handleUdpDiscovery() {
 
   udpBuffer[length] = '\0';
 
-  Serial.print("UDP packet from ");
-  Serial.print(udp.remoteIP());
-  Serial.print(":");
-  Serial.print(udp.remotePort());
-  Serial.print(" -> ");
-  Serial.println(udpBuffer);
+  Serial.printf("[UDP] Packet from %s:%d -> %s\n",
+                udp.remoteIP().toString().c_str(),
+                udp.remotePort(),
+                udpBuffer);
 
   if (strcmp(udpBuffer, "DISCOVER_ESP") == 0) {
     sendDiscoveryResponse(udp.remoteIP(), udp.remotePort());
@@ -127,17 +161,17 @@ void handleUdpDiscovery() {
 
 void startAccessPoint() {
   Serial.println();
-  Serial.println("Starting Access Point...");
+  Serial.println("[WiFi] Starting Access Point...");
 
   WiFi.mode(WIFI_AP);
-  WiFi.softAPConfig(local_IP, gateway, subnet);
-  WiFi.softAP(AP_SSID, AP_PASSWORD);
+  WiFi.softAPConfig(Config::LOCAL_IP, Config::GATEWAY, Config::SUBNET);
+  WiFi.softAP(Config::AP_SSID, Config::AP_PASSWORD);
 
-  Serial.print("AP SSID: ");
-  Serial.println(AP_SSID);
-  Serial.print("AP IP address: ");
+  Serial.print("[WiFi] SSID: ");
+  Serial.println(Config::AP_SSID);
+  Serial.print("[WiFi] AP IP address: ");
   Serial.println(WiFi.softAPIP());
-  Serial.print("Chip ID: ");
+  Serial.print("[WiFi] Chip ID: ");
   Serial.println(String(ESP.getChipId(), HEX));
 }
 
@@ -149,28 +183,29 @@ void setup() {
   Serial.begin(9600);
   delay(100);
 
-  pinMode(LED_PIN, OUTPUT);
-  setLed(false);
+  for (size_t i = 0; i < RELAY_COUNT; i++) {
+    pinMode(relays[i].pin, OUTPUT);
+    setRelay(relays[i], false);
+  }
 
   startAccessPoint();
 
-  if (udp.begin(UDP_PORT)) {
-    Serial.print("UDP Discovery started on port: ");
-    Serial.println(UDP_PORT);
+  if (udp.begin(Config::UDP_PORT)) {
+    Serial.print("[UDP] Discovery service started on port: ");
+    Serial.println(Config::UDP_PORT);
   } else {
-    Serial.println("UDP initialization failed!");
+    Serial.println("[UDP] Initialization failed!");
   }
 
-  server.on("/", handleRoot);
   server.on("/status", HTTP_GET, handleStatus);
-  server.on("/ledon", HTTP_GET, handleLedOn);
-  server.on("/ledoff", HTTP_GET, handleLedOff);
+  server.on("/relay/on", HTTP_GET, handleRelayOn);
+  server.on("/relay/off", HTTP_GET, handleRelayOff);
   server.onNotFound(handleNotFound);
 
   server.begin();
 
-  Serial.print("HTTP server started on port: ");
-  Serial.println(HTTP_PORT);
+  Serial.print("[HTTP] Server started on port: ");
+  Serial.println(Config::HTTP_PORT);
 }
 
 // =========================

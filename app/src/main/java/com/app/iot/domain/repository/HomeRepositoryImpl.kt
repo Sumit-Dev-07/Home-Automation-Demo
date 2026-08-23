@@ -14,30 +14,9 @@ class HomeRepositoryImpl @Inject constructor(
     private val homeDataSource: HomeDataSource,
     private val dispatchersProvider: DispatchersProvider
 ) : HomeRepository {
-    override suspend fun ledOn(): Flow<ApiState<ResponseBody>> {
+    override suspend fun toggleRelay(name: String, isOn: Boolean): Flow<ApiState<ResponseBody>> {
         return flow {
-            val result = safeApiCall { homeDataSource.ledOn() }
-            emit(result)
-        }.flowOn(dispatchersProvider.io())
-    }
-
-    override suspend fun ledOff(): Flow<ApiState<ResponseBody>> {
-        return flow {
-            val result = safeApiCall { homeDataSource.ledOff() }
-            emit(result)
-        }.flowOn(dispatchersProvider.io())
-    }
-
-    override suspend fun led2On(): Flow<ApiState<ResponseBody>> {
-        return flow {
-            val result = safeApiCall { homeDataSource.led2On() }
-            emit(result)
-        }.flowOn(dispatchersProvider.io())
-    }
-
-    override suspend fun led2Off(): Flow<ApiState<ResponseBody>> {
-        return flow {
-            val result = safeApiCall { homeDataSource.led2Off() }
+            val result = safeApiCall { homeDataSource.toggleRelay(name, isOn) }
             emit(result)
         }.flowOn(dispatchersProvider.io())
     }
