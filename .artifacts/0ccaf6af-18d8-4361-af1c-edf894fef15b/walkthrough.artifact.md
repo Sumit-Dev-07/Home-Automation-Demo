@@ -14,6 +14,16 @@ I have implemented a full setup for dynamic device management using ESP8266 and 
     - `/wifi/update`: Change the Access Point password.
     - `/relay/toggle`: Updated to support status-based switching.
 
+### Professional ESP Firmware Structure
+The firmware has been refactored into modular components for scalability:
+- **[Config.h](file:///C:/Users/sumit/Documents/WorkGround/Home-Automation-Demo/esp/esp_hotspot_full_setup/Config.h)**: Centralized configuration for WiFi and system parameters.
+- **[Device.h](file:///C:/Users/sumit/Documents/WorkGround/Home-Automation-Demo/esp/esp_hotspot_full_setup/Device.h)**: Definition of the `Device` structure and shared state.
+- **[Persistence.h](file:///C:/Users/sumit/Documents/WorkGround/Home-Automation-Demo/esp/esp_hotspot_full_setup/Persistence.h)**: EEPROM logic to save/load dynamic configurations.
+- **[WebHandlers.h](file:///C:/Users/sumit/Documents/WorkGround/Home-Automation-Demo/esp/esp_hotspot_full_setup/WebHandlers.h)**: Clear separation of HTTP API endpoints.
+- **[DiscoveryService.h](file:///C:/Users/sumit/Documents/WorkGround/Home-Automation-Demo/esp/esp_hotspot_full_setup/DiscoveryService.h)**: Isolated UDP discovery logic.
+- **[SyncLogic.h](file:///C:/Users/sumit/Documents/WorkGround/Home-Automation-Demo/esp/esp_hotspot_full_setup/SyncLogic.h)**: Logic for physical two-way switch synchronization.
+- **[esp_hotspot_full_setup.ino](file:///C:/Users/sumit/Documents/WorkGround/Home-Automation-Demo/esp/esp_hotspot_full_setup/esp_hotspot_full_setup.ino)**: Clean entry point orchestrating all modules.
+
 ### Android Application
 - **Device Management**:
     - **Add Device**: New FloatingActionButton and Dialog to add devices by name and pin.
