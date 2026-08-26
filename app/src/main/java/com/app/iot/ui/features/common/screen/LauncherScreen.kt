@@ -15,47 +15,41 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.app.iot.BuildConfig
 import com.app.iot.R
+import com.app.iot.ui.components.AppImage
 import com.app.iot.ui.theme.HomeAutomationTheme
 import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun LauncherScreen(onNavigateToMain: () -> Unit) {
-
-    LaunchedEffect(Unit) {
-        delay(2000.milliseconds)
-        onNavigateToMain()
-    }
-
-    Box(
-        modifier = Modifier
+	
+	LaunchedEffect(Unit) {
+		delay(2.seconds)
+		onNavigateToMain()
+	}
+	
+	Box(
+		modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        // Image in center
-        Image(
-            painter = painterResource(id = R.drawable.app_logo),
-            contentDescription = "App Logo",
-            modifier = Modifier.size(180.dp)
-        )
-
-        // Version at bottom
-        Text(
-            text = "Version ${BuildConfig.VERSION_NAME}",
-            modifier = Modifier
+		contentAlignment = Alignment.Center
+	) {
+		AppImage(imageRes =  R.drawable.app_logo)
+		Text(
+			text = "Version ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+			modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 48.dp),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-        )
-    }
+			style = MaterialTheme.typography.bodyMedium,
+			color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+		)
+	}
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LauncherPreview() {
-    HomeAutomationTheme() {
-        LauncherScreen(onNavigateToMain = {})
-    }
+	HomeAutomationTheme() {
+		LauncherScreen(onNavigateToMain = {})
+	}
 }
