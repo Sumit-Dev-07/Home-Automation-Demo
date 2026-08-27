@@ -24,6 +24,9 @@ foundationLayout = "1.11.4"
 # Compose Navigation
 composeNavigation = "2.9.8"
 
+# Compose Loading
+composeLoading = "1.0.4"
+
 # Serialization
 serialization = "1.7.3"
 
@@ -65,6 +68,9 @@ androidx-compose-foundation-layout = { group = "androidx.compose.foundation", na
 androidx-navigation-compose = {module = "androidx.navigation:navigation-compose" , version.ref = "composeNavigation"}
 kotlinx-serialization-json = {module = "org.jetbrains.kotlinx:kotlinx-serialization-json" , version.ref = "serialization"}
 androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+
+# Compose Loading
+compose-loading = { group = "com.github.commandiron", name = "ComposeLoading", version.ref = "composeLoading" }
 
 
 [plugins]

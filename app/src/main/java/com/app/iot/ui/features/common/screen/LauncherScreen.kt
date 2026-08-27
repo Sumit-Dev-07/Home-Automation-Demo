@@ -16,12 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.commandiron.compose_loading.CubeGrid
 import com.app.iot.BuildConfig
-import com.app.iot.R
 import com.app.iot.data.ApiPath
-import com.app.iot.ui.components.core.AppImage
 import com.app.iot.ui.components.core.AppText
 import com.app.iot.ui.features.home.viewmodel.HomeViewModel
 import com.app.iot.ui.theme.AppFont
@@ -118,12 +118,9 @@ fun LauncherScreen(
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            AppImage(imageRes = R.drawable.app_logo)
-            AppText(
-                text = statusText,
-                fontFamily = AppFont.onestMedium,
-                modifier = Modifier.padding(top = 16.dp),
-                color = AppPalette.gray
+            CubeGrid(
+                color = AppPalette.secondary,
+                size = DpSize(100.dp, 100.dp),
             )
         }
 
