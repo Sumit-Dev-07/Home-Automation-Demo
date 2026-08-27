@@ -32,6 +32,7 @@ import com.app.iot.ui.theme.AppPalette
 import com.app.iot.ui.theme.HomeAutomationTheme
 import com.app.iot.util.UiState
 import com.commandiron.compose_loading.ChasingDots
+import com.commandiron.compose_loading.Wave
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -129,15 +130,15 @@ fun LauncherScreen(
                 .padding(bottom = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ChasingDots(
+            Wave(
                 color = AppPalette.secondary,
                 size = 24.dp
             )
             Spacer(modifier = Modifier.height(12.dp))
             AppText(
                 text = "Version ${BuildConfig.VERSION_NAME}",
-                fontFamily = AppFont.onestSemiBold,
-                color = AppPalette.gray
+                fontFamily = AppFont.onestMedium,
+                color = AppPalette.gray,
             )
         }
     }
