@@ -136,6 +136,7 @@ fun HomeTab(
                 connectivityManager.bindProcessToNetwork(null)
                 systemIpAddress = "0.0.0.0"
                 wifiSsid = ""
+                viewModel.clearDevices()
             }
 
             override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
@@ -172,7 +173,7 @@ fun HomeTab(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (selectedDeviceIp.isNotEmpty()) {
+            if (selectedDeviceIp.isNotEmpty() && isAppWifiConnected) {
                 SelectedDeviceCard(
                     name = selectedDeviceName.ifEmpty { "Connected Device" },
                     ipAddress = selectedDeviceIp,

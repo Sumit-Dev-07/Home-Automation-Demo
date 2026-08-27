@@ -254,6 +254,11 @@ class HomeViewModel @Inject constructor(
         _scanState.value = UiState.Idle
     }
 
+    fun clearDevices() {
+        _devices.value = emptyList()
+        _statusState.value = UiState.Idle
+    }
+
     fun isWifiConnected(): Boolean = wifiConnectivityManager.isWifiConnected()
 
     fun getWifiIpAddress(): String = wifiConnectivityManager.getWifiIpAddress()
