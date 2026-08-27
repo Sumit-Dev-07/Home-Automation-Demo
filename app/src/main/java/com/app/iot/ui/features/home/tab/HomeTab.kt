@@ -29,11 +29,11 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Air
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeveloperBoard
 import androidx.compose.material.icons.filled.DeviceThermostat
 import androidx.compose.material.icons.filled.Lightbulb
@@ -107,6 +107,7 @@ fun HomeTab(
 
     var showAddDeviceDialog by remember { mutableStateOf(false) }
     var showWifiDialog by remember { mutableStateOf(false) }
+    var deviceToDelete by remember { mutableStateOf<DeviceStatus?>(null) }
 
     val ledState by viewModel.ledState.collectAsState()
     val statusState by viewModel.statusState.collectAsState()
@@ -230,7 +231,7 @@ fun HomeTab(
                                 }
                             },
                             onDelete = {
-                                viewModel.removeDevice(device.name)
+                                deviceToDelete = device
                             }
                         )
                     }
@@ -242,6 +243,7 @@ fun HomeTab(
             onClick = { showAddDeviceDialog = true },
             containerColor = AppPalette.primary,
             contentColor = AppPalette.white,
+            shape = CircleShape,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(top = 24.dp, end = 24.dp, start = 24.dp, bottom = 160.dp)
@@ -334,6 +336,17 @@ fun HomeTab(
             } else if (removeDeviceState is UiState.Error) {
                 snackbarHostState.showSnackbar((removeDeviceState as UiState.Error).message)
             }
+        }
+
+        deviceToDelete?.let { device ->
+            DeleteConfirmationDialog(
+                deviceName = device.name,
+                onDismiss = { deviceToDelete = null },
+                onConfirm = {
+                    viewModel.removeDevice(device.name)
+                    deviceToDelete = null
+                }
+            )
         }
     }
 }
@@ -775,13 +788,13 @@ fun DeviceItem(
                     }
                     IconButton(
                         onClick = onDelete,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            Icons.Default.Delete,
+                            painter = painterResource(id = R.drawable.ic_remove),
                             contentDescription = "Delete",
                             tint = AppPalette.red.copy(alpha = 0.8f),
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -1052,6 +1065,99 @@ fun WifiConfigDialog(
                             ) {
                                 Text("Update", fontFamily = AppFont.onestMedium)
                             }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DeleteConfirmationDialog(
+    deviceName: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        val outerCornerRadius = 24.dp
+        val innerCornerRadius = 20.dp
+        val gap = 6.dp
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(0.85f)
+                .wrapContentHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(outerCornerRadius))
+                    .background(AppPalette.black.copy(alpha = 0.05f))
+                    .border(1.dp, AppPalette.black.copy(alpha = 0.1f), RoundedCornerShape(outerCornerRadius))
+            )
+
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(gap)
+                    .clip(RoundedCornerShape(innerCornerRadius)),
+                color = AppPalette.white
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_remove),
+                        contentDescription = null,
+                        tint = AppPalette.red,
+                        modifier = Modifier.size(48.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Delete Device?",
+                        fontFamily = AppFont.onestBold,
+                        fontSize = 20.sp,
+                        color = AppPalette.black
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "Are you sure you want to remove '$deviceName'? This action cannot be undone.",
+                        fontFamily = AppFont.onestRegular,
+                        fontSize = 14.sp,
+                        color = AppPalette.gray,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        TextButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Cancel", color = AppPalette.gray, fontFamily = AppFont.onestMedium)
+                        }
+
+                        Button(
+                            onClick = onConfirm,
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = AppPalette.red),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Delete", color = AppPalette.white, fontFamily = AppFont.onestMedium)
                         }
                     }
                 }
