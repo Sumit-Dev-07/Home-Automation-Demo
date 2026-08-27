@@ -3,6 +3,7 @@ package com.app.iot.data
 object ApiPath {
     const val API_BASE_URL = "https://dummyjson.com/"
     var LOCAL_WIFI_IP_URL = ""
+    var SELECTED_DEVICE_NAME = ""
     const val LOGIN = "auth/login"
     const val PRODUCTS = "products"
     const val CATEGORIES = "products/categories"

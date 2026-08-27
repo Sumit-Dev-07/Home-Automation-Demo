@@ -63,8 +63,6 @@ fun LauncherScreen(
 
         onDispose {
             connectivityManager.unregisterNetworkCallback(networkCallback)
-            // Note: We don't unbind here because HomeTab will take over and bind it again.
-            // If we unbind here, there might be a gap where the process is not bound.
         }
     }
 
@@ -74,7 +72,6 @@ fun LauncherScreen(
             val ip = viewModel.getWifiIpAddress()
             viewModel.findEspDevices(ip)
         } else {
-            // Wait a bit to see if WiFi connects
             delay(3.seconds)
             if (!isWifiReady) {
                 statusText = "WiFi not connected"
@@ -91,6 +88,7 @@ fun LauncherScreen(
                 if (firstDevice != null) {
                     statusText = "Device found: ${firstDevice.name}"
                     ApiPath.LOCAL_WIFI_IP_URL = firstDevice.ip
+                    ApiPath.SELECTED_DEVICE_NAME = firstDevice.name
                     delay(1.seconds)
                     onNavigateToMain()
                 } else {
@@ -100,7 +98,6 @@ fun LauncherScreen(
                 }
             }
             is UiState.Error -> {
-                // Only show error if we were actually trying to scan
                 if (statusText == "Scanning for devices...") {
                     statusText = state.message
                     delay(2.seconds)

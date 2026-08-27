@@ -103,7 +103,7 @@ fun HomeTab(
     var systemIpAddress by remember { mutableStateOf("0.0.0.0") }
     var wifiSsid by remember { mutableStateOf("") }
     var selectedDeviceIp by remember { mutableStateOf(ApiPath.LOCAL_WIFI_IP_URL) }
-    var selectedDeviceName by remember { mutableStateOf("") }
+    var selectedDeviceName by remember { mutableStateOf(ApiPath.SELECTED_DEVICE_NAME) }
 
     var showAddDeviceDialog by remember { mutableStateOf(false) }
     var showWifiDialog by remember { mutableStateOf(false) }
@@ -271,6 +271,7 @@ fun HomeTab(
                 onDismiss = { viewModel.resetScanState() },
                 onSelectDevice = { device ->
                     ApiPath.LOCAL_WIFI_IP_URL = device.ip
+                    ApiPath.SELECTED_DEVICE_NAME = device.name
                     selectedDeviceIp = device.ip
                     selectedDeviceName = device.name
                     viewModel.resetScanState()
