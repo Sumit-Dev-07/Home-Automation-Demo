@@ -1,6 +1,6 @@
 package com.app.iot.nav
 
-import LauncherScreen
+import com.app.iot.ui.features.common.screen.LauncherScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
