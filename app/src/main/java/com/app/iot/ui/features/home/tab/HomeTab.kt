@@ -157,7 +157,7 @@ fun HomeTab(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(modifier)
+                .padding(top = modifier.calculateTopPadding())
                 .padding(16.dp)
         ) {
             WifiStatusHeader(
@@ -191,7 +191,8 @@ fun HomeTab(
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(bottom = modifier.calculateBottomPadding() + 80.dp)
             ) {
                 if (devices.isEmpty()) {
                     item(span = { GridItemSpan(2) }) {
@@ -246,14 +247,19 @@ fun HomeTab(
             shape = CircleShape,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(top = 24.dp, end = 24.dp, start = 24.dp, bottom = 160.dp)
+                .padding(
+                    bottom = modifier.calculateBottomPadding() + 32.dp,
+                    end = 24.dp
+                )
         ) {
             Icon(Icons.Default.Add, contentDescription = "Add Device")
         }
 
         SnackbarHost(
             hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = modifier.calculateBottomPadding() + 16.dp)
         )
 
         LaunchedEffect(ledState) {
