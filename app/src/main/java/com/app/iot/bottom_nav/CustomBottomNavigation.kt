@@ -26,7 +26,7 @@ fun CustomBottomNavigation(
 ) {
     val items = listOf(
         NavigationItem("Home", R.drawable.home_active, R.drawable.home_inactive),
-        NavigationItem("Search", R.drawable.search_active, R.drawable.search_inactive),
+        NavigationItem("Schedule", R.drawable.ic_active_clock, R.drawable.ic_clock),
         NavigationItem("Cart", R.drawable.cart_active, R.drawable.cart_inactive),
         NavigationItem("Favorite", R.drawable.fav_active, R.drawable.fav_inactive),
         NavigationItem("Profile", R.drawable.user_active, R.drawable.user_inactive)
