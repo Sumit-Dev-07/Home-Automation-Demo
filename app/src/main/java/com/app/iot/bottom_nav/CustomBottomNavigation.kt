@@ -14,10 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.app.iot.R
+import com.app.iot.ui.theme.AppPalette
 
 @Composable
 fun CustomBottomNavigation(
@@ -32,8 +32,8 @@ fun CustomBottomNavigation(
         NavigationItem("Profile", R.drawable.user_active, R.drawable.user_inactive)
     )
 
-    val orangeColor = Color(0xFFE64A19)
-    val grayColor = Color(0xFF9E9E9E)
+    val orangeColor = AppPalette.primary
+    val grayColor = AppPalette.gray
 
     // Layout dimensions calculation:
     // Outer Height = Inner Bar Height + (Gap * 2) -> 76 + (8 * 2) = 92dp
@@ -60,10 +60,10 @@ fun CustomBottomNavigation(
                 .fillMaxWidth()
                 .height(outerBoxHeight)
                 .clip(RoundedCornerShape(outerCornerRadius))
-                .background(Color.White.copy(alpha = 0.2f))
+                .background(AppPalette.white.copy(alpha = 0.2f))
                 .border(
                     1.dp,
-                    Color.White.copy(alpha = 0.3f),
+                    AppPalette.white.copy(alpha = 0.3f),
                     RoundedCornerShape(outerCornerRadius),
                 )
         )
@@ -75,7 +75,7 @@ fun CustomBottomNavigation(
                 .padding(gapBetweenBars) // Gap between outer and inner
                 .height(innerBarHeight)
                 .clip(RoundedCornerShape(innerCornerRadius))
-                .background(Color.White),
+                .background(AppPalette.white),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {

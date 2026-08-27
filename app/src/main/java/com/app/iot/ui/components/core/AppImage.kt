@@ -1,4 +1,4 @@
-package com.app.iot.ui.components
+package com.app.iot.ui.components.core
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image

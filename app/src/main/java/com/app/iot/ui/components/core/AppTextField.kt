@@ -1,4 +1,4 @@
-package com.app.iot.ui.components
+package com.app.iot.ui.components.core
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.app.iot.ui.theme.AppPalette
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -47,12 +48,12 @@ fun AppTextField(
     onPasswordVisibilityChange: (() -> Unit)? = null,
 ) {
     val borderColor = when {
-        isError -> Color.Red
-        !enabled -> Color.LightGray
-        else -> Color.Gray
+        isError -> AppPalette.red
+        !enabled -> AppPalette.lightGray
+        else -> AppPalette.gray
     }
 
-    val textColor = if (enabled) Color.Black else Color.Gray
+    val textColor = if (enabled) AppPalette.black else AppPalette.gray
 
     Column(modifier = modifier) {
         if (title != null) {

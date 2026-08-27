@@ -1,10 +1,9 @@
-package com.app.iot.ui.components
+package com.app.iot.ui.components.core
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.QuestionMark
 import androidx.compose.material3.Button

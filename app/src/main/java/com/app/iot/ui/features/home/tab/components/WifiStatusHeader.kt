@@ -24,12 +24,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.app.iot.ui.theme.OnestMedium
-import com.app.iot.ui.theme.OnestRegular
-import com.app.iot.ui.theme.OnestSemiBold
+import com.app.iot.ui.theme.AppFont
+import com.app.iot.ui.theme.AppPalette
 
 @Composable
 fun WifiStatusHeader(
@@ -50,7 +48,7 @@ fun WifiStatusHeader(
 			modifier = Modifier
 				.fillMaxWidth()
 				.clip(RoundedCornerShape(innerCornerRadius)),
-			color = Color.White
+			color = AppPalette.white
 		) {
 			Row(
 				modifier = Modifier.padding(16.dp),
@@ -60,13 +58,13 @@ fun WifiStatusHeader(
 					CircularProgressIndicator(
 						modifier = Modifier.size(24.dp),
 						strokeWidth = 2.dp,
-						color = Color(0xFF4CAF50)
+						color = AppPalette.green
 					)
 				} else {
 					Icon(
 						imageVector = if (isConnected) Icons.Default.Wifi else Icons.Default.WifiOff,
 						contentDescription = null,
-						tint = if (isConnected) Color(0xFF4CAF50) else Color(0xFFF44336),
+						tint = if (isConnected) AppPalette.green else AppPalette.red,
 						modifier = Modifier.size(24.dp)
 					)
 				}
@@ -74,17 +72,17 @@ fun WifiStatusHeader(
 				Column {
 					Text(
 						text = if (isConnected) (if (ssid.isNotEmpty()) ssid else "System Online") else "System Offline",
-						fontFamily = OnestMedium,
+						fontFamily = AppFont.onestMedium,
 						fontSize = 14.sp,
-						color = if (isConnected) Color(0xFF2E7D32) else Color(0xFFC62828)
+						color = if (isConnected) AppPalette.darkGreen else AppPalette.darkRed
 					)
 					if (isConnected) {
 						Row(verticalAlignment = Alignment.CenterVertically) {
 							Text(
 								text = "IP: $ipAddress",
-								fontFamily = OnestRegular,
+								fontFamily = AppFont.onestRegular,
 								fontSize = 11.sp,
-								color = Color.Gray
+								color = AppPalette.gray
 							)
 						}
 					}
@@ -95,7 +93,7 @@ fun WifiStatusHeader(
 						Icon(
 							Icons.Default.Settings,
 							contentDescription = "WiFi Settings",
-							tint = Color.Gray,
+							tint = AppPalette.gray,
 							modifier = Modifier.size(20.dp)
 						)
 					}
@@ -107,9 +105,9 @@ fun WifiStatusHeader(
 					) {
 						Text(
 							text = "Connect",
-							fontFamily = OnestSemiBold,
+							fontFamily = AppFont.onestSemiBold,
 							fontSize = 12.sp,
-							color = Color(0xFFC62828)
+							color = AppPalette.darkRed
 						)
 					}
 				}

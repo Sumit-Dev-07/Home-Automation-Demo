@@ -12,10 +12,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import com.app.iot.bottom_nav.CustomBottomNavigation
 import com.app.iot.ui.features.home.tab.HomeTab
+import com.app.iot.ui.theme.AppPalette
 
 @Composable
 fun HomeScreen() {
@@ -51,7 +51,7 @@ fun HomeScreen() {
 	}
 	
 	Scaffold(
-		containerColor = Color(0xFFF18673),
+		containerColor = AppPalette.secondary,
 		bottomBar = {
 			CustomBottomNavigation(
 				selectedItem = selectedItem,

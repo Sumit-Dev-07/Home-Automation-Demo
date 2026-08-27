@@ -87,10 +87,8 @@ import com.app.iot.ui.features.home.tab.components.WifiStatusHeader
 import com.app.iot.ui.features.home.viewmodel.DeviceStatus
 import com.app.iot.ui.features.home.viewmodel.DiscoveredDevice
 import com.app.iot.ui.features.home.viewmodel.HomeViewModel
-import com.app.iot.ui.theme.OnestBold
-import com.app.iot.ui.theme.OnestMedium
-import com.app.iot.ui.theme.OnestRegular
-import com.app.iot.ui.theme.OnestSemiBold
+import com.app.iot.ui.theme.AppFont
+import com.app.iot.ui.theme.AppPalette
 import com.app.iot.util.UiState
 import okhttp3.ResponseBody
 
@@ -206,18 +204,18 @@ fun HomeTab(
                                 imageVector = Icons.Default.DeveloperBoard,
                                 contentDescription = null,
                                 modifier = Modifier.size(80.dp),
-                                tint = Color.White
+                                tint = AppPalette.white
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
                                 text = "No devices found",
                                 style = MaterialTheme.typography.titleMedium,
-                                color = Color.White
+                                color = AppPalette.white
                             )
                             Text(
                                 text = "Tap to add a device",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White
+                                color = AppPalette.white
                             )
                         }
                     }
@@ -241,8 +239,8 @@ fun HomeTab(
 
         FloatingActionButton(
             onClick = { showAddDeviceDialog = true },
-            containerColor = Color(0xFFE64A19),
-            contentColor = Color.White,
+            containerColor = AppPalette.primary,
+            contentColor = AppPalette.white,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(top = 24.dp, end = 24.dp, start = 24.dp, bottom = 160.dp)
@@ -354,10 +352,10 @@ fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(outerCornerRadius))
-                .background(Color.Black.copy(alpha = 0.05f))
+                .background(AppPalette.black.copy(alpha = 0.05f))
                 .border(
                     1.dp,
-                    Color.Black.copy(alpha = 0.1f),
+                    AppPalette.black.copy(alpha = 0.1f),
                     RoundedCornerShape(outerCornerRadius),
                 )
         )
@@ -367,7 +365,7 @@ fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
                 .fillMaxSize()
                 .padding(gap)
                 .clip(RoundedCornerShape(innerCornerRadius)),
-            color = Color.White
+            color = AppPalette.white
         ) {
             Row(
                 modifier = Modifier
@@ -380,22 +378,22 @@ fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
                     Icon(
                         imageVector = Icons.Default.DeveloperBoard,
                         contentDescription = null,
-                        tint = Color(0xFF4CAF50),
+                        tint = AppPalette.green,
                         modifier = Modifier.size(32.dp)
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
                         Text(
                             text = name,
-                            fontFamily = OnestSemiBold,
+                            fontFamily = AppFont.onestSemiBold,
                             fontSize = 16.sp,
-                            color = Color(0xFF212121)
+                            color = AppPalette.black
                         )
                         Text(
                             text = "IP: $ipAddress",
-                            fontFamily = OnestRegular,
+                            fontFamily = AppFont.onestRegular,
                             fontSize = 12.sp,
-                            color = Color.Gray
+                            color = AppPalette.gray
                         )
                     }
                 }
@@ -403,9 +401,9 @@ fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
                 TextButton(onClick = onChange) {
                     Text(
                         text = "Change",
-                        fontFamily = OnestSemiBold,
+                        fontFamily = AppFont.onestSemiBold,
                         fontSize = 12.sp,
-                        color = Color(0xFFE64A19)
+                        color = AppPalette.primary
                     )
                 }
             }
@@ -429,10 +427,10 @@ fun FindDevicesCard(onFind: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(outerCornerRadius))
-                .background(Color.Black.copy(alpha = 0.05f))
+                .background(AppPalette.black.copy(alpha = 0.05f))
                 .border(
                     1.dp,
-                    Color.Black.copy(alpha = 0.1f),
+                    AppPalette.black.copy(alpha = 0.1f),
                     RoundedCornerShape(outerCornerRadius),
                 )
         )
@@ -442,7 +440,7 @@ fun FindDevicesCard(onFind: () -> Unit) {
                 .fillMaxSize()
                 .padding(gap)
                 .clip(RoundedCornerShape(innerCornerRadius)),
-            color = Color.White
+            color = AppPalette.white
         ) {
             Row(
                 modifier = Modifier
@@ -461,15 +459,15 @@ fun FindDevicesCard(onFind: () -> Unit) {
                     Column {
                         Text(
                             text = "Find Devices",
-                            fontFamily = OnestSemiBold,
+                            fontFamily = AppFont.onestSemiBold,
                             fontSize = 16.sp,
-                            color = Color(0xFF212121)
+                            color = AppPalette.black
                         )
                         Text(
                             text = "Scan network for ESP devices",
-                            fontFamily = OnestRegular,
+                            fontFamily = AppFont.onestRegular,
                             fontSize = 12.sp,
-                            color = Color.Gray
+                            color = AppPalette.gray
                         )
                     }
                 }
@@ -477,16 +475,16 @@ fun FindDevicesCard(onFind: () -> Unit) {
                 Button(
                     onClick = onFind,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFE64A19)
+                        containerColor = AppPalette.primary
                     ),
                     shape = RoundedCornerShape(12.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
                     Text(
                         text = "Scan",
-                        fontFamily = OnestMedium,
+                        fontFamily = AppFont.onestMedium,
                         fontSize = 14.sp,
-                        color = Color.White
+                        color = AppPalette.white
                     )
                 }
             }
@@ -518,10 +516,10 @@ fun DiscoveryDialog(
                 modifier = Modifier
                     .matchParentSize()
                     .clip(RoundedCornerShape(outerCornerRadius))
-                    .background(Color.Black.copy(alpha = 0.05f))
+                    .background(AppPalette.black.copy(alpha = 0.05f))
                     .border(
                         1.dp,
-                        Color.Black.copy(alpha = 0.1f),
+                        AppPalette.black.copy(alpha = 0.1f),
                         RoundedCornerShape(outerCornerRadius),
                     )
             )
@@ -531,7 +529,7 @@ fun DiscoveryDialog(
                     .fillMaxWidth()
                     .padding(gap)
                     .clip(RoundedCornerShape(innerCornerRadius)),
-                color = Color.White
+                color = AppPalette.white
             ) {
                 Column(
                     modifier = Modifier
@@ -541,9 +539,9 @@ fun DiscoveryDialog(
                 ) {
                     Text(
                         text = "Scanning Network",
-                        fontFamily = OnestBold,
+                        fontFamily = AppFont.onestBold,
                         fontSize = 18.sp,
-                        color = Color(0xFF212121)
+                        color = AppPalette.black
                     )
 
                     Spacer(modifier = Modifier.height(20.dp))
@@ -558,16 +556,16 @@ fun DiscoveryDialog(
                             is UiState.Loading -> {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     CircularProgressIndicator(
-                                        color = Color(0xFF4CAF50),
+                                        color = AppPalette.green,
                                         strokeWidth = 3.dp,
                                         modifier = Modifier.size(40.dp)
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))
                                     Text(
                                         "Searching for ESP devices...",
-                                        fontFamily = OnestRegular,
+                                        fontFamily = AppFont.onestRegular,
                                         fontSize = 14.sp,
-                                        color = Color.Gray
+                                        color = AppPalette.gray
                                     )
                                 }
                             }
@@ -585,7 +583,7 @@ fun DiscoveryDialog(
                                                     onDismiss()
                                                 },
                                             shape = RoundedCornerShape(12.dp),
-                                            color = Color(0xFFF5F5F5)
+                                            color = AppPalette.lightGray
                                         ) {
                                             Row(
                                                 modifier = Modifier.padding(12.dp),
@@ -594,22 +592,22 @@ fun DiscoveryDialog(
                                                 Icon(
                                                     Icons.Default.Wifi,
                                                     contentDescription = null,
-                                                    tint = Color(0xFF4CAF50),
+                                                    tint = AppPalette.green,
                                                     modifier = Modifier.size(20.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(12.dp))
                                                 Column {
                                                     Text(
                                                         text = device.name,
-                                                        fontFamily = OnestMedium,
+                                                        fontFamily = AppFont.onestMedium,
                                                         fontSize = 14.sp,
-                                                        color = Color(0xFF424242)
+                                                        color = AppPalette.darkGray
                                                     )
                                                     Text(
                                                         text = device.ip,
-                                                        fontFamily = OnestRegular,
+                                                        fontFamily = AppFont.onestRegular,
                                                         fontSize = 11.sp,
-                                                        color = Color.Gray
+                                                        color = AppPalette.gray
                                                     )
                                                 }
                                             }
@@ -621,9 +619,9 @@ fun DiscoveryDialog(
                             is UiState.Error -> {
                                 Text(
                                     state.message,
-                                    fontFamily = OnestRegular,
+                                    fontFamily = AppFont.onestRegular,
                                     fontSize = 14.sp,
-                                    color = Color(0xFFF44336),
+                                    color = AppPalette.red,
                                     textAlign = TextAlign.Center
                                 )
                             }
@@ -640,9 +638,9 @@ fun DiscoveryDialog(
                     ) {
                         Text(
                             "Close",
-                            fontFamily = OnestSemiBold,
+                            fontFamily = AppFont.onestSemiBold,
                             fontSize = 14.sp,
-                            color = Color(0xFFE64A19)
+                            color = AppPalette.primary
                         )
                     }
                 }
@@ -680,10 +678,10 @@ fun DeviceItem(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(outerCornerRadius))
-                .background(Color.Black.copy(alpha = 0.05f))
+                .background(AppPalette.black.copy(alpha = 0.05f))
                 .border(
                     1.dp,
-                    Color.Black.copy(alpha = 0.1f),
+                    AppPalette.black.copy(alpha = 0.1f),
                     RoundedCornerShape(outerCornerRadius),
                 )
         )
@@ -693,7 +691,7 @@ fun DeviceItem(
                 .fillMaxSize()
                 .padding(gap)
                 .clip(RoundedCornerShape(innerCornerRadius)),
-            color = Color.White
+            color = AppPalette.white
         ) {
             Column(
                 modifier = Modifier
@@ -710,9 +708,9 @@ fun DeviceItem(
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
-                            tint = if (device.isOn && device.isConnected) Color(0xFFE64A19)
-                            else if (!device.isConnected) Color(0xFFF44336)
-                            else Color(0xFF9E9E9E),
+                            tint = if (device.isOn && device.isConnected) AppPalette.primary
+                            else if (!device.isConnected) AppPalette.red
+                            else AppPalette.gray,
                             modifier = Modifier.size(28.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -722,12 +720,12 @@ fun DeviceItem(
                         onCheckedChange = onCheckedChange,
                         enabled = device.isConnected,
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = Color.White,
-                            checkedTrackColor = Color(0xFFE64A19),
-                            uncheckedThumbColor = Color.White,
-                            uncheckedTrackColor = Color(0xFFE0E0E0),
-                            disabledCheckedTrackColor = Color(0xFFE64A19).copy(alpha = 0.3f),
-                            disabledUncheckedTrackColor = Color(0xFFE0E0E0).copy(alpha = 0.3f)
+                            checkedThumbColor = AppPalette.white,
+                            checkedTrackColor = AppPalette.primary,
+                            uncheckedThumbColor = AppPalette.white,
+                            uncheckedTrackColor = AppPalette.borderGray,
+                            disabledCheckedTrackColor = AppPalette.primary.copy(alpha = 0.3f),
+                            disabledUncheckedTrackColor = AppPalette.borderGray.copy(alpha = 0.3f)
                         )
                     )
                 }
@@ -740,9 +738,9 @@ fun DeviceItem(
                     Column {
                         Text(
                             text = device.name,
-                            fontFamily = OnestSemiBold,
+                            fontFamily = AppFont.onestSemiBold,
                             fontSize = 15.sp,
-                            color = if (!device.isConnected) Color(0xFFC62828) else Color(0xFF212121)
+                            color = if (!device.isConnected) AppPalette.darkRed else AppPalette.black
                         )
                         
                         Row(
@@ -753,24 +751,24 @@ fun DeviceItem(
                                 modifier = Modifier
                                     .size(6.dp)
                                     .background(
-                                        color = if (device.isConnected) Color(0xFF4CAF50) else Color(0xFFF44336),
+                                        color = if (device.isConnected) AppPalette.green else AppPalette.red,
                                         shape = RoundedCornerShape(50)
                                     )
                             )
                             Spacer(modifier = Modifier.width(4.dp))
                             Text(
                                 text = if (device.isConnected) "Active" else "Inactive",
-                                fontFamily = OnestRegular,
+                                fontFamily = AppFont.onestRegular,
                                 fontSize = 10.sp,
-                                color = if (device.isConnected) Color(0xFF4CAF50) else Color(0xFFF44336)
+                                color = if (device.isConnected) AppPalette.green else AppPalette.red
                             )
                         }
                         Text(
                             text = if (device.isOn) "On" else "Off",
-                            fontFamily = OnestMedium,
+                            fontFamily = AppFont.onestMedium,
                             fontSize = 13.sp,
-                            color = if (device.isOn && device.isConnected) Color(0xFFE64A19)
-                            else Color(0xFF9E9E9E)
+                            color = if (device.isOn && device.isConnected) AppPalette.primary
+                            else AppPalette.gray
                         )
                     }
                     IconButton(
@@ -780,7 +778,7 @@ fun DeviceItem(
                         Icon(
                             Icons.Default.Delete,
                             contentDescription = "Delete",
-                            tint = Color.Red.copy(alpha = 0.8f),
+                            tint = AppPalette.red.copy(alpha = 0.8f),
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -821,8 +819,8 @@ fun AddDeviceDialog(
                 modifier = Modifier
                     .matchParentSize()
                     .clip(RoundedCornerShape(outerCornerRadius))
-                    .background(Color.Black.copy(alpha = 0.05f))
-                    .border(1.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(outerCornerRadius))
+                    .background(AppPalette.black.copy(alpha = 0.05f))
+                    .border(1.dp, AppPalette.black.copy(alpha = 0.1f), RoundedCornerShape(outerCornerRadius))
             )
 
             Surface(
@@ -830,7 +828,7 @@ fun AddDeviceDialog(
                     .fillMaxWidth()
                     .padding(gap)
                     .clip(RoundedCornerShape(innerCornerRadius)),
-                color = Color.White
+                color = AppPalette.white
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -838,9 +836,9 @@ fun AddDeviceDialog(
                 ) {
                     Text(
                         text = "Add New Device",
-                        fontFamily = OnestBold,
+                        fontFamily = AppFont.onestBold,
                         fontSize = 20.sp,
-                        color = Color(0xFF212121)
+                        color = AppPalette.black
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
@@ -848,12 +846,12 @@ fun AddDeviceDialog(
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        label = { Text("Device Name", fontFamily = OnestRegular) },
+                        label = { Text("Device Name", fontFamily = AppFont.onestRegular) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFE64A19),
-                            focusedLabelColor = Color(0xFFE64A19)
+                            focusedBorderColor = AppPalette.primary,
+                            focusedLabelColor = AppPalette.primary
                         ),
                         singleLine = true
                     )
@@ -879,14 +877,14 @@ fun AddDeviceDialog(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     if (state is UiState.Loading) {
-                        CircularProgressIndicator(color = Color(0xFFE64A19))
+                        CircularProgressIndicator(color = AppPalette.primary)
                     } else {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
                             TextButton(onClick = onDismiss) {
-                                Text("Cancel", color = Color.Gray, fontFamily = OnestMedium)
+                                Text("Cancel", color = AppPalette.gray, fontFamily = AppFont.onestMedium)
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
@@ -898,10 +896,10 @@ fun AddDeviceDialog(
                                     )
                                 },
                                 enabled = name.isNotBlank(),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE64A19)),
+                                colors = ButtonDefaults.buttonColors(containerColor = AppPalette.primary),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
-                                Text("Add Device", fontFamily = OnestMedium)
+                                Text("Add Device", fontFamily = AppFont.onestMedium)
                             }
                         }
                     }
@@ -930,15 +928,15 @@ fun PinDropdown(
             value = selectedPin,
             onValueChange = {},
             readOnly = true,
-            label = { Text(label, fontFamily = OnestRegular) },
+            label = { Text(label, fontFamily = AppFont.onestRegular) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFFE64A19),
-                focusedLabelColor = Color(0xFFE64A19)
+                focusedBorderColor = AppPalette.primary,
+                focusedLabelColor = AppPalette.primary
             )
         )
 
@@ -948,7 +946,7 @@ fun PinDropdown(
         ) {
             pins.forEach { p ->
                 DropdownMenuItem(
-                    text = { Text(p, fontFamily = OnestRegular) },
+                    text = { Text(p, fontFamily = AppFont.onestRegular) },
                     onClick = {
                         onPinSelected(p)
                         expanded = false
@@ -985,8 +983,8 @@ fun WifiConfigDialog(
                 modifier = Modifier
                     .matchParentSize()
                     .clip(RoundedCornerShape(outerCornerRadius))
-                    .background(Color.Black.copy(alpha = 0.05f))
-                    .border(1.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(outerCornerRadius))
+                    .background(AppPalette.black.copy(alpha = 0.05f))
+                    .border(1.dp, AppPalette.black.copy(alpha = 0.1f), RoundedCornerShape(outerCornerRadius))
             )
 
             Surface(
@@ -994,7 +992,7 @@ fun WifiConfigDialog(
                     .fillMaxWidth()
                     .padding(gap)
                     .clip(RoundedCornerShape(innerCornerRadius)),
-                color = Color.White
+                color = AppPalette.white
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -1002,17 +1000,17 @@ fun WifiConfigDialog(
                 ) {
                     Text(
                         text = "WiFi Configuration",
-                        fontFamily = OnestBold,
+                        fontFamily = AppFont.onestBold,
                         fontSize = 20.sp,
-                        color = Color(0xFF212121)
+                        color = AppPalette.black
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         text = "Enter new WiFi password. The device will restart and connect to current SSID with this password.",
-                        fontFamily = OnestRegular,
+                        fontFamily = AppFont.onestRegular,
                         fontSize = 12.sp,
-                        color = Color.Gray,
+                        color = AppPalette.gray,
                         textAlign = TextAlign.Center
                     )
 
@@ -1021,12 +1019,12 @@ fun WifiConfigDialog(
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
-                        label = { Text("New WiFi Password", fontFamily = OnestRegular) },
+                        label = { Text("New WiFi Password", fontFamily = AppFont.onestRegular) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color(0xFFE64A19),
-                            focusedLabelColor = Color(0xFFE64A19)
+                            focusedBorderColor = AppPalette.primary,
+                            focusedLabelColor = AppPalette.primary
                         ),
                         singleLine = true
                     )
@@ -1034,23 +1032,23 @@ fun WifiConfigDialog(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     if (state is UiState.Loading) {
-                        CircularProgressIndicator(color = Color(0xFFE64A19))
+                        CircularProgressIndicator(color = AppPalette.primary)
                     } else {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.End
                         ) {
                             TextButton(onClick = onDismiss) {
-                                Text("Cancel", color = Color.Gray, fontFamily = OnestMedium)
+                                Text("Cancel", color = AppPalette.gray, fontFamily = AppFont.onestMedium)
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                             Button(
                                 onClick = { onUpdate(password) },
                                 enabled = password.length >= 8,
-                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE64A19)),
+                                colors = ButtonDefaults.buttonColors(containerColor = AppPalette.primary),
                                 shape = RoundedCornerShape(12.dp)
                             ) {
-                                Text("Update", fontFamily = OnestMedium)
+                                Text("Update", fontFamily = AppFont.onestMedium)
                             }
                         }
                     }

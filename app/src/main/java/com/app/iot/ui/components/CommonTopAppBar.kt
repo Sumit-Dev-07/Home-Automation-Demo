@@ -14,7 +14,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import com.app.iot.R
-import com.app.iot.ui.theme.OnestSemiBold
+import com.app.iot.ui.theme.AppFont
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,7 +29,7 @@ fun CommonTopAppBar(
                 text = title,
                 style = TextStyle(
                     color = MaterialTheme.colorScheme.onPrimary,
-                    fontFamily = OnestSemiBold,
+                    fontFamily = AppFont.onestSemiBold,
                     fontSize = 18.sp
                 ),
             )

@@ -4,8 +4,10 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import com.app.iot.R
 
-val OnestLight = FontFamily(Font(R.font.onest_light))
-val OnestRegular = FontFamily(Font(R.font.onest_regular))
-val OnestMedium = FontFamily(Font(R.font.onest_medium))
-val OnestSemiBold = FontFamily(Font(R.font.onest_semi_bold))
-val OnestBold = FontFamily(Font(R.font.onest_bold))
+object AppFont {
+	val onestLight = FontFamily(Font(R.font.onest_light))
+	val onestRegular = FontFamily(Font(R.font.onest_regular))
+	val onestMedium = FontFamily(Font(R.font.onest_medium))
+	val onestSemiBold = FontFamily(Font(R.font.onest_semi_bold))
+	val onestBold = FontFamily(Font(R.font.onest_bold))
+}
