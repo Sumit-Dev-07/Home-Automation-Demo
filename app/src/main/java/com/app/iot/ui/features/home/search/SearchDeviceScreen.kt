@@ -26,7 +26,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -77,6 +75,7 @@ fun SearchDeviceScreen(
 			devices = emptyList(),
 			permissionMessage = null,
 			showOpenSettings = false,
+			hasNearbyPermissions = false,
 			onClose = onClose,
 			onAllowAndContinue = {},
 			onAddManually = onAddManually,
@@ -155,6 +154,7 @@ fun SearchDeviceScreen(
 		devices = discoveryState,
 		permissionMessage = permissionMessage,
 		showOpenSettings = showOpenSettings,
+		hasNearbyPermissions = context.hasNearbyDevicePermissions(),
 		onClose = onClose,
 		onAllowAndContinue = { requestPermissionsOrScan() },
 		onAddManually = onAddManually,
@@ -183,6 +183,7 @@ private fun SearchDeviceContent(
 	devices: List<DeviceDiscoveryStatus>,
 	permissionMessage: String?,
 	showOpenSettings: Boolean,
+	hasNearbyPermissions: Boolean,
 	onClose: () -> Unit,
 	onAllowAndContinue: () -> Unit,
 	onAddManually: () -> Unit,
@@ -205,20 +206,6 @@ private fun SearchDeviceContent(
 	}
 
 	val buttonShape = RoundedCornerShape(12.dp)
-	val view = LocalView.current
-
-	DisposableEffect(view) {
-		if (view.isInEditMode) {
-			return@DisposableEffect onDispose { }
-		}
-		val window = (view.context as? Activity)?.window
-		val controller = window?.let { WindowCompat.getInsetsController(it, view) }
-		val wasLight = controller?.isAppearanceLightStatusBars
-		controller?.isAppearanceLightStatusBars = false
-		onDispose {
-			wasLight?.let { controller.isAppearanceLightStatusBars = it }
-		}
-	}
 
 	Scaffold(
 		topBar = {
@@ -243,7 +230,7 @@ private fun SearchDeviceContent(
 				isScanning = step == SearchFlowStep.SCANNING
 			)
 
-			Spacer(modifier = Modifier.height(40.dp))
+			Spacer(modifier = Modifier.height(16.dp))
 
 			Text(
 				text = title,
@@ -315,7 +302,7 @@ private fun SearchDeviceContent(
 							shape = buttonShape
 						) {
 							Text(
-								text = "Allow and Continue",
+								text = if (hasNearbyPermissions) "Start Scan" else "Allow and Continue",
 								color = AppPalette.white,
 								fontFamily = AppFont.onestMedium,
 								fontSize = 14.sp
@@ -328,7 +315,7 @@ private fun SearchDeviceContent(
 								.fillMaxWidth()
 								.height(56.dp),
 							shape = buttonShape,
-							border = BorderStroke(1.dp, AppPalette.borderGray),
+							border = BorderStroke(1.dp, AppPalette.secondary),
 							colors = ButtonDefaults.outlinedButtonColors(contentColor = AppPalette.secondary)
 						) {
 							Text(
@@ -347,7 +334,7 @@ private fun SearchDeviceContent(
 								.fillMaxWidth()
 								.height(56.dp),
 							shape = buttonShape,
-							border = BorderStroke(1.dp, AppPalette.borderGray),
+							border = BorderStroke(1.dp, AppPalette.secondary),
 							colors = ButtonDefaults.outlinedButtonColors(contentColor = AppPalette.black)
 						) {
 							Text(
@@ -436,6 +423,7 @@ fun SearchDeviceResultsPreview() {
 			),
 			permissionMessage = null,
 			showOpenSettings = false,
+			hasNearbyPermissions = true,
 			onClose = {},
 			onAllowAndContinue = {},
 			onAddManually = {},

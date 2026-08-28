@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.app.iot.ui.features.home.viewmodel.ConnectionStatus
@@ -113,3 +114,48 @@ fun DiscoveredDeviceItem(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun DiscoveredDeviceItemPreview() {
+    com.app.iot.ui.theme.HomeAutomationTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            DiscoveredDeviceItem(
+                status = DeviceDiscoveryStatus(
+                    device = com.app.iot.ui.features.home.viewmodel.DiscoveredDevice(
+                        name = "Living Room ESP32",
+                        ip = "192.168.1.15"
+                    ),
+                    connectionStatus = ConnectionStatus.CONNECTED
+                ),
+                onRetry = {}
+            )
+            
+            DiscoveredDeviceItem(
+                status = DeviceDiscoveryStatus(
+                    device = com.app.iot.ui.features.home.viewmodel.DiscoveredDevice(
+                        name = "Kitchen Controller",
+                        ip = "192.168.1.16"
+                    ),
+                    connectionStatus = ConnectionStatus.CONNECTING
+                ),
+                onRetry = {}
+            )
+            
+            DiscoveredDeviceItem(
+                status = DeviceDiscoveryStatus(
+                    device = com.app.iot.ui.features.home.viewmodel.DiscoveredDevice(
+                        name = "Bedroom Sensor",
+                        ip = "192.168.1.17"
+                    ),
+                    connectionStatus = ConnectionStatus.FAILED
+                ),
+                onRetry = {}
+            )
+        }
+    }
+}
+

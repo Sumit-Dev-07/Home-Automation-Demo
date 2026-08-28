@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -55,8 +56,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -74,6 +73,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -82,6 +82,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.app.iot.R
 import com.app.iot.data.ApiPath
 import com.app.iot.ui.features.home.search.SearchDeviceScreen
+import com.app.iot.ui.features.home.tab.components.VerticalOnOffToggle
 import com.app.iot.ui.features.home.tab.components.WifiStatusHeader
 import com.app.iot.ui.features.home.viewmodel.DeviceStatus
 import com.app.iot.ui.features.home.viewmodel.DiscoveredDevice
@@ -381,6 +382,13 @@ fun HomeTab(
 	}
 }
 
+
+
+
+
+
+
+
 @Composable
 fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
 	val outerCornerRadius = 24.dp
@@ -455,6 +463,13 @@ fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
 		}
 	}
 }
+
+
+
+
+
+
+
 
 @Composable
 fun FindDevicesCard(onFind: () -> Unit) {
@@ -536,6 +551,13 @@ fun FindDevicesCard(onFind: () -> Unit) {
 		}
 	}
 }
+
+
+
+
+
+
+
 
 @Composable
 fun DiscoveryDialog(
@@ -695,14 +717,21 @@ fun DiscoveryDialog(
 }
 
 
+
+
+
+
+
+
+
 @Composable
 fun DeviceItem(
 	device: DeviceStatus,
 	onCheckedChange: (Boolean) -> Unit,
 	onDelete: () -> Unit
 ) {
-	val outerCornerRadius = 24.dp
-	val innerCornerRadius = 20.dp
+	val outerCornerRadius = 28.dp
+	val innerCornerRadius = 24.dp
 	val gap = 6.dp
 	
 	val icon = when (device.iconType) {
@@ -715,7 +744,7 @@ fun DeviceItem(
 	Box(
 		modifier = Modifier
             .fillMaxWidth()
-            .height(170.dp),
+            .height(180.dp),
 		contentAlignment = Alignment.Center
 	) {
 		Box(
@@ -737,59 +766,37 @@ fun DeviceItem(
                 .clip(RoundedCornerShape(innerCornerRadius)),
 			color = AppPalette.white
 		) {
-			Column(
+			Row(
 				modifier = Modifier
-                    .padding(12.dp)
+                    .padding(16.dp)
                     .fillMaxSize(),
-				verticalArrangement = Arrangement.SpaceBetween
+				horizontalArrangement = Arrangement.SpaceBetween,
+				verticalAlignment = Alignment.CenterVertically
 			) {
-				Row(
-					modifier = Modifier.fillMaxWidth(),
-					horizontalArrangement = Arrangement.SpaceBetween,
-					verticalAlignment = Alignment.CenterVertically
+				Column(
+					modifier = Modifier.weight(1f).fillMaxHeight(),
+					verticalArrangement = Arrangement.SpaceBetween
 				) {
-					Row(verticalAlignment = Alignment.CenterVertically) {
-						Icon(
-							imageVector = icon,
-							contentDescription = null,
-							tint = if (device.isOn && device.isConnected) AppPalette.primary
-							else if (!device.isConnected) AppPalette.red
-							else AppPalette.gray,
-							modifier = Modifier.size(28.dp)
-						)
-						Spacer(modifier = Modifier.width(8.dp))
-					}
-					Switch(
-						checked = device.isOn,
-						onCheckedChange = onCheckedChange,
-						enabled = device.isConnected,
-						colors = SwitchDefaults.colors(
-							checkedThumbColor = AppPalette.white,
-							checkedTrackColor = AppPalette.primary,
-							uncheckedThumbColor = AppPalette.white,
-							uncheckedTrackColor = AppPalette.borderGray,
-							disabledCheckedTrackColor = AppPalette.primary.copy(alpha = 0.3f),
-							disabledUncheckedTrackColor = AppPalette.borderGray.copy(alpha = 0.3f)
-						)
+					Icon(
+						imageVector = icon,
+						contentDescription = null,
+						tint = if (device.isOn && device.isConnected) AppPalette.primary
+						else if (!device.isConnected) AppPalette.red
+						else AppPalette.gray,
+						modifier = Modifier.size(32.dp)
 					)
-				}
-				
-				Row(
-					modifier = Modifier.fillMaxWidth(),
-					horizontalArrangement = Arrangement.SpaceBetween,
-					verticalAlignment = Alignment.CenterVertically
-				) {
+					
 					Column {
 						Text(
 							text = device.name,
 							fontFamily = AppFont.onestSemiBold,
-							fontSize = 15.sp,
+							fontSize = 16.sp,
 							color = if (!device.isConnected) AppPalette.darkRed else AppPalette.black
 						)
 						
 						Row(
 							verticalAlignment = Alignment.CenterVertically,
-							modifier = Modifier.padding(vertical = 2.dp)
+							modifier = Modifier.padding(vertical = 4.dp)
 						) {
 							Box(
 								modifier = Modifier
@@ -799,38 +806,53 @@ fun DeviceItem(
                                         shape = RoundedCornerShape(50)
                                     )
 							)
-							Spacer(modifier = Modifier.width(4.dp))
+							Spacer(modifier = Modifier.width(6.dp))
 							Text(
 								text = if (device.isConnected) "Active" else "Inactive",
 								fontFamily = AppFont.onestRegular,
-								fontSize = 10.sp,
+								fontSize = 11.sp,
 								color = if (device.isConnected) AppPalette.green else AppPalette.red
 							)
 						}
-						Text(
-							text = if (device.isOn) "On" else "Off",
-							fontFamily = AppFont.onestMedium,
-							fontSize = 13.sp,
-							color = if (device.isOn && device.isConnected) AppPalette.primary
-							else AppPalette.gray
-						)
-					}
-					IconButton(
-						onClick = onDelete,
-						modifier = Modifier.size(32.dp)
-					) {
-						Icon(
-							painter = painterResource(id = R.drawable.ic_remove),
-							contentDescription = "Delete",
-							tint = AppPalette.red.copy(alpha = 0.8f),
-							modifier = Modifier.size(24.dp)
-						)
 					}
 				}
+                
+                Column(
+                    modifier = Modifier.fillMaxHeight(),
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+	                VerticalOnOffToggle(
+		                isOn = device.isOn,
+		                onStatusChange = onCheckedChange,
+		                enabled = device.isConnected
+	                )
+					
+                    IconButton(
+                        onClick = onDelete,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_remove),
+                            contentDescription = "Delete",
+                            tint = AppPalette.red.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    
+                    
+                }
 			}
 		}
 	}
 }
+
+
+
+
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -953,6 +975,13 @@ fun AddDeviceDialog(
 	}
 }
 
+
+
+
+
+
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PinDropdown(
@@ -1000,6 +1029,13 @@ fun PinDropdown(
 		}
 	}
 }
+
+
+
+
+
+
+
 
 @Composable
 fun WifiConfigDialog(
@@ -1102,6 +1138,13 @@ fun WifiConfigDialog(
 	}
 }
 
+
+
+
+
+
+
+
 @Composable
 fun DeleteConfirmationDialog(
 	deviceName: String,
@@ -1194,3 +1237,32 @@ fun DeleteConfirmationDialog(
 		}
 	}
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun DeviceItemPreview() {
+    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        DeviceItem(
+            device = DeviceStatus(name = "Living Room Light", isOn = true, isConnected = true, ipAddress = "1.1.1.1"),
+            onCheckedChange = {},
+            onDelete = {}
+        )
+        DeviceItem(
+            device = DeviceStatus(name = "Bedroom Light", isOn = false, isConnected = true, ipAddress = "1.1.1.2"),
+            onCheckedChange = {},
+            onDelete = {}
+        )
+        DeviceItem(
+            device = DeviceStatus(name = "Kitchen Light", isOn = false, isConnected = false, ipAddress = "1.1.1.3"),
+            onCheckedChange = {},
+            onDelete = {}
+        )
+    }
+}
+
+
+
+
+
+
+

@@ -62,7 +62,7 @@ fun RadarGraphic(
             val center = Offset(size.width / 2, size.height / 2)
             val radius = size.minDimension / 2
             
-            val ringColor = AppPalette.borderGray.copy(alpha = 0.6f)
+            val ringColor = AppPalette.secondary.copy(alpha = 0.6f)
 
             // Draw concentric circles
             drawCircle(
