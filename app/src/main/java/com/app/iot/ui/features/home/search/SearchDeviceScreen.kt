@@ -10,15 +10,19 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,6 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,11 +47,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.app.iot.R
 import com.app.iot.ui.features.home.search.components.DiscoveryList
@@ -215,7 +222,22 @@ private fun SearchDeviceContent(
 	}
 
 	val buttonShape = RoundedCornerShape(12.dp)
+	val view = LocalView.current
 
+	DisposableEffect(view) {
+		if (view.isInEditMode) {
+			return@DisposableEffect onDispose { }
+		}
+		val window = (view.context as? Activity)?.window
+		val controller = window?.let { WindowCompat.getInsetsController(it, view) }
+		val wasLight = controller?.isAppearanceLightStatusBars
+		controller?.isAppearanceLightStatusBars = false
+		onDispose {
+			wasLight?.let { controller.isAppearanceLightStatusBars = it }
+		}
+	}
+
+	Box(modifier = Modifier.fillMaxSize()) {
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -303,7 +325,7 @@ private fun SearchDeviceContent(
 							text = "Open settings",
 							fontFamily = AppFont.onestSemiBold,
 							fontSize = 12.sp,
-							color = AppPalette.primary
+							color = AppPalette.secondary
 						)
 					}
 				}
@@ -337,7 +359,7 @@ private fun SearchDeviceContent(
 							modifier = Modifier
 								.fillMaxWidth()
 								.height(56.dp),
-							colors = ButtonDefaults.buttonColors(containerColor = AppPalette.primary),
+							colors = ButtonDefaults.buttonColors(containerColor = AppPalette.secondary),
 							shape = buttonShape
 						) {
 							Text(
@@ -355,11 +377,11 @@ private fun SearchDeviceContent(
 								.height(56.dp),
 							shape = buttonShape,
 							border = BorderStroke(1.dp, AppPalette.borderGray),
-							colors = ButtonDefaults.outlinedButtonColors(contentColor = AppPalette.primary)
+							colors = ButtonDefaults.outlinedButtonColors(contentColor = AppPalette.secondary)
 						) {
 							Text(
 								text = "Add Manually",
-								color = AppPalette.primary,
+								color = AppPalette.secondary,
 								fontFamily = AppFont.onestMedium,
 								fontSize = 14.sp
 							)
@@ -391,7 +413,7 @@ private fun SearchDeviceContent(
 							modifier = Modifier
 								.fillMaxWidth()
 								.height(56.dp),
-							colors = ButtonDefaults.buttonColors(containerColor = AppPalette.primary),
+							colors = ButtonDefaults.buttonColors(containerColor = AppPalette.secondary),
 							shape = buttonShape
 						) {
 							Text(
@@ -408,12 +430,12 @@ private fun SearchDeviceContent(
 								.fillMaxWidth()
 								.height(56.dp),
 							shape = buttonShape,
-							border = BorderStroke(1.dp, AppPalette.borderGray),
-							colors = ButtonDefaults.outlinedButtonColors(contentColor = AppPalette.primary)
+							border = BorderStroke(1.dp, AppPalette.secondary),
+							colors = ButtonDefaults.outlinedButtonColors(contentColor = AppPalette.secondary)
 						) {
 							Text(
 								text = "Scan again",
-								color = AppPalette.primary,
+								color = AppPalette.secondary,
 								fontFamily = AppFont.onestMedium,
 								fontSize = 14.sp
 							)
@@ -433,6 +455,15 @@ private fun SearchDeviceContent(
 				}
 			}
 		}
+	}
+
+		Box(
+			modifier = Modifier
+				.align(Alignment.TopCenter)
+				.fillMaxWidth()
+				.windowInsetsTopHeight(WindowInsets.statusBars)
+				.background(AppPalette.secondary)
+		)
 	}
 }
 
