@@ -35,6 +35,7 @@ import com.app.iot.ui.components.core.AppText
 import com.app.iot.ui.features.home.viewmodel.HomeViewModel
 import com.app.iot.ui.theme.AppFont
 import com.app.iot.ui.theme.AppPalette
+import com.app.iot.ui.theme.AppPreview
 import com.app.iot.ui.theme.HomeAutomationTheme
 import com.app.iot.util.UiState
 import com.commandiron.compose_loading.Wave
@@ -120,6 +121,11 @@ fun LauncherScreen(
 		}
 	}
 	
+	LauncherContent()
+}
+
+@Composable
+fun LauncherContent() {
 	Box(
 		modifier = Modifier
 			.fillMaxSize()
@@ -154,7 +160,7 @@ fun LauncherScreen(
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun LauncherPreview() {
-	HomeAutomationTheme {
-		LauncherScreen(onNavigateToMain = {})
+	AppPreview(padding = 0.dp, color = AppPalette.white) {
+		LauncherContent()
 	}
 }
