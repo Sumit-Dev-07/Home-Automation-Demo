@@ -13,9 +13,12 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.app.iot.bottom_nav.CustomBottomNavigation
 import com.app.iot.ui.features.home.tab.HomeTab
 import com.app.iot.ui.theme.AppPalette
+import com.app.iot.ui.theme.AppPreview
 
 @Composable
 fun HomeScreen() {
@@ -66,5 +69,13 @@ fun HomeScreen() {
 			3 -> BaseContent("Favorite", innerPadding)
 			4 -> BaseContent("Profile", innerPadding)
 		}
+	}
+}
+
+@Preview
+@Composable
+fun HomeScreenPreview() {
+	AppPreview(padding = 0.dp) {
+		HomeScreen()
 	}
 }
