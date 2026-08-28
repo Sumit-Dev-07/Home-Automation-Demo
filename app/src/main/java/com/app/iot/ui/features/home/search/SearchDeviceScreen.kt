@@ -10,31 +10,21 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsTopHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -45,17 +35,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.app.iot.R
+import com.app.iot.ui.components.CommonTopAppBar
 import com.app.iot.ui.features.home.search.components.DiscoveryList
 import com.app.iot.ui.features.home.search.components.RadarGraphic
 import com.app.iot.ui.features.home.viewmodel.ConnectionStatus
@@ -86,7 +74,6 @@ fun SearchDeviceScreen(
 	if (isPreview()) {
 		SearchDeviceContent(
 			step = SearchFlowStep.INITIAL,
-			wifiSsid = "Home_WiFi",
 			devices = emptyList(),
 			permissionMessage = null,
 			showOpenSettings = false,
@@ -110,7 +97,6 @@ fun SearchDeviceScreen(
 	var showOpenSettings by remember { mutableStateOf(false) }
 	val discoveryState by homeViewModel.discoveryState.collectAsState()
 	val scanState by homeViewModel.scanState.collectAsState()
-	val wifiSsid = remember { homeViewModel.getWifiSsid() }
 
 	fun startScan() {
 		permissionMessage = null
@@ -166,7 +152,6 @@ fun SearchDeviceScreen(
 
 	SearchDeviceContent(
 		step = currentStep,
-		wifiSsid = wifiSsid,
 		devices = discoveryState,
 		permissionMessage = permissionMessage,
 		showOpenSettings = showOpenSettings,
@@ -192,11 +177,9 @@ fun SearchDeviceScreen(
 	)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchDeviceContent(
 	step: SearchFlowStep,
-	wifiSsid: String,
 	devices: List<DeviceDiscoveryStatus>,
 	permissionMessage: String?,
 	showOpenSettings: Boolean,
@@ -237,42 +220,11 @@ private fun SearchDeviceContent(
 		}
 	}
 
-	Box(modifier = Modifier.fillMaxSize()) {
 	Scaffold(
 		topBar = {
-			TopAppBar(
-				title = {
-					Column(
-						horizontalAlignment = Alignment.CenterHorizontally,
-						modifier = Modifier.fillMaxWidth()
-					) {
-						Text(
-							text = "Welcome Back",
-							fontSize = 12.sp,
-							fontFamily = AppFont.onestRegular,
-							color = AppPalette.gray
-						)
-						Text(
-							text = wifiSsid.ifEmpty { "WiFi Connected" },
-							fontSize = 16.sp,
-							fontFamily = AppFont.onestBold,
-							color = AppPalette.black
-						)
-					}
-				},
-				navigationIcon = {
-					IconButton(onClick = onClose) {
-						Icon(
-							painter = painterResource(R.drawable.outline_arrow_back_24),
-							contentDescription = "Back",
-							tint = AppPalette.black
-						)
-					}
-				},
-				actions = {
-					Spacer(modifier = Modifier.width(48.dp))
-				},
-				colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+			CommonTopAppBar(
+				title = "Search Devices",
+				onBackClick = onClose
 			)
 		},
 		containerColor = AppPalette.white
@@ -456,15 +408,6 @@ private fun SearchDeviceContent(
 			}
 		}
 	}
-
-		Box(
-			modifier = Modifier
-				.align(Alignment.TopCenter)
-				.fillMaxWidth()
-				.windowInsetsTopHeight(WindowInsets.statusBars)
-				.background(AppPalette.secondary)
-		)
-	}
 }
 
 @Preview(showBackground = true)
@@ -481,7 +424,6 @@ fun SearchDeviceResultsPreview() {
 	AppPreview(padding = 0.dp, color = AppPalette.white) {
 		SearchDeviceContent(
 			step = SearchFlowStep.RESULTS,
-			wifiSsid = "Home_WiFi",
 			devices = listOf(
 				DeviceDiscoveryStatus(
 					DiscoveredDevice("Living Room Light", "192.168.1.12"),

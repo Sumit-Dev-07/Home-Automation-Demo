@@ -53,7 +53,7 @@ fun RadarGraphic(
 
     Box(
         modifier = modifier
-            .size(280.dp)
+            .size(300.dp)
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
