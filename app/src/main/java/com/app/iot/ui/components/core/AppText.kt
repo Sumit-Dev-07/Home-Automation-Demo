@@ -1,7 +1,6 @@
 package com.app.iot.ui.components.core
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,7 +11,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import com.app.iot.ui.theme.AppPreview
 import com.app.iot.ui.theme.AppFont
 
 /**
@@ -86,11 +85,13 @@ fun ErrorTextInputField(
 @Preview(showBackground = true)
 @Composable
 fun AppTextFontsPreview() {
-    Column(modifier = Modifier.padding(16.dp)) {
-        AppText(text = "Onest Light", fontFamily = AppFont.onestLight)
-        AppText(text = "Onest Regular", fontFamily = AppFont.onestRegular)
-        AppText(text = "Onest Medium", fontFamily = AppFont.onestMedium)
-        AppText(text = "Onest SemiBold", fontFamily = AppFont.onestSemiBold)
-        AppText(text = "Onest Bold", fontFamily = AppFont.onestBold)
+    AppPreview {
+        Column {
+            AppText(text = "Onest Light", fontFamily = AppFont.onestLight)
+            AppText(text = "Onest Regular", fontFamily = AppFont.onestRegular)
+            AppText(text = "Onest Medium", fontFamily = AppFont.onestMedium)
+            AppText(text = "Onest SemiBold", fontFamily = AppFont.onestSemiBold)
+            AppText(text = "Onest Bold", fontFamily = AppFont.onestBold)
+        }
     }
 }

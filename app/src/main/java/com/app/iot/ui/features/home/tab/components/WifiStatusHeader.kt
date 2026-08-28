@@ -24,8 +24,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.app.iot.ui.theme.AppPreview
+import com.app.iot.ui.theme.HomeAutomationTheme
 import com.app.iot.ui.theme.AppFont
 import com.app.iot.ui.theme.AppPalette
 
@@ -71,7 +74,7 @@ fun WifiStatusHeader(
 				Spacer(modifier = Modifier.width(12.dp))
 				Column {
 					Text(
-						text = if (isConnected) (if (ssid.isNotEmpty()) ssid else "System Online") else "System Offline",
+						text = if (isConnected) ssid.ifEmpty { "System Online" } else "System Offline",
 						fontFamily = AppFont.onestMedium,
 						fontSize = 14.sp,
 						color = if (isConnected) AppPalette.darkGreen else AppPalette.darkRed
@@ -114,4 +117,47 @@ fun WifiStatusHeader(
 			}
 		}
 	}
+}
+
+@Composable
+private fun WifiStatusHeaderPreviewItem(
+    isConnected: Boolean = true,
+    ssid: String = "Home_WiFi",
+    ipAddress: String = "192.168.1.5",
+    isRefreshing: Boolean = false
+) {
+    AppPreview {
+        WifiStatusHeader(
+            isConnected = isConnected,
+            ssid = ssid,
+            ipAddress = ipAddress,
+            isRefreshing = isRefreshing,
+            onRefresh = {},
+            onSettingsClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun WifiStatusHeaderConnectedPreview() {
+    WifiStatusHeaderPreviewItem()
+}
+
+@Preview(showBackground = true)
+@Composable
+fun WifiStatusHeaderDisconnectedPreview() {
+    WifiStatusHeaderPreviewItem(
+        isConnected = false,
+        ssid = "",
+        ipAddress = ""
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun WifiStatusHeaderRefreshingPreview() {
+    WifiStatusHeaderPreviewItem(
+        isRefreshing = true
+    )
 }
