@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -36,7 +37,6 @@ import com.app.iot.ui.features.home.viewmodel.HomeViewModel
 import com.app.iot.ui.theme.AppFont
 import com.app.iot.ui.theme.AppPalette
 import com.app.iot.ui.theme.AppPreview
-import com.app.iot.ui.theme.HomeAutomationTheme
 import com.app.iot.util.UiState
 import com.commandiron.compose_loading.Wave
 import kotlinx.coroutines.delay
@@ -126,33 +126,38 @@ fun LauncherScreen(
 
 @Composable
 fun LauncherContent() {
-	Box(
-		modifier = Modifier
-			.fillMaxSize()
-			.background(MaterialTheme.colorScheme.background),
-		contentAlignment = Alignment.Center
-	) {
-		AppImage(
-			imageRes = R.drawable.app_logo,
-			size = 150.dp
-		)
-		
-		Column(
+	Scaffold(
+		contentColor = AppPalette.white
+	) { innerPadding ->
+		Box(
 			modifier = Modifier
-				.align(Alignment.BottomCenter)
-				.padding(bottom = 32.dp),
-			horizontalAlignment = Alignment.CenterHorizontally
+				.padding(innerPadding)
+				.fillMaxSize()
+				.background(AppPalette.white),
+			contentAlignment = Alignment.Center
 		) {
-			Wave(
-				color = AppPalette.secondary,
-				size = 24.dp
+			AppImage(
+				imageRes = R.drawable.app_logo,
+				size = 150.dp
 			)
-			Spacer(modifier = Modifier.height(12.dp))
-			AppText(
-				text = "Version ${BuildConfig.VERSION_NAME}",
-				fontFamily = AppFont.onestMedium,
-				color = AppPalette.gray,
-			)
+			
+			Column(
+				modifier = Modifier
+					.align(Alignment.BottomCenter)
+					.padding(bottom = 16.dp),
+				horizontalAlignment = Alignment.CenterHorizontally
+			) {
+				Wave(
+					color = AppPalette.secondary,
+					size = 24.dp
+				)
+				Spacer(modifier = Modifier.height(12.dp))
+				AppText(
+					text = "Version ${BuildConfig.VERSION_NAME}",
+					fontFamily = AppFont.onestMedium,
+					color = AppPalette.gray,
+				)
+			}
 		}
 	}
 }

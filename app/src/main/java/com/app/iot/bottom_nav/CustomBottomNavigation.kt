@@ -45,7 +45,7 @@ fun CustomBottomNavigation(
     val gapBetweenBars = 8.dp // Space between the outer glow and inner white bar
     
     val horizontalPadding = 16.dp // Margin from screen sides
-    val bottomMargin = 24.dp      // Distance from the bottom of the screen
+    val bottomMargin = 12.dp      // Distance from the bottom of the screen
 
     Box(
         modifier = Modifier
