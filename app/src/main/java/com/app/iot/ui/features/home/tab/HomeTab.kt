@@ -88,15 +88,15 @@ import com.app.iot.ui.features.home.viewmodel.HomeViewModel
 import com.app.iot.ui.theme.AppFont
 import com.app.iot.ui.theme.AppPalette
 import com.app.iot.util.UiState
+import com.app.iot.util.isPreview
 import okhttp3.ResponseBody
 
 @Composable
 fun HomeTab(
 	modifier: PaddingValues,
-	viewModel: HomeViewModel? = if (LocalInspectionMode.current) null else hiltViewModel()
+	viewModel: HomeViewModel? = if (isPreview()) null else hiltViewModel()
 ) {
-	if (LocalInspectionMode.current) {
-		// Preview mode: Show a placeholder or mock UI
+	if (isPreview()) {
 		Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
 			Text("Home Tab Preview", color = AppPalette.white)
 		}
