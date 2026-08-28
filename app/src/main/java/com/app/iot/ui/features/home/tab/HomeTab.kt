@@ -81,6 +81,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.app.iot.R
 import com.app.iot.data.ApiPath
+import com.app.iot.ui.features.home.search.SearchDeviceScreen
 import com.app.iot.ui.features.home.tab.components.WifiStatusHeader
 import com.app.iot.ui.features.home.viewmodel.DeviceStatus
 import com.app.iot.ui.features.home.viewmodel.DiscoveredDevice
@@ -115,6 +116,7 @@ fun HomeTab(
 	
 	var showAddDeviceDialog by remember { mutableStateOf(false) }
 	var showWifiDialog by remember { mutableStateOf(false) }
+	var showSearchFlow by remember { mutableStateOf(false) }
 	var deviceToDelete by remember { mutableStateOf<DeviceStatus?>(null) }
 	
 	val ledState by homeViewModel.ledState.collectAsState()
@@ -188,12 +190,12 @@ fun HomeTab(
 					name = selectedDeviceName.ifEmpty { "Connected Device" },
 					ipAddress = selectedDeviceIp,
 					onChange = {
-						homeViewModel.findEspDevices(systemIpAddress)
+						showSearchFlow = true
 					}
 				)
 				Spacer(modifier = Modifier.height(16.dp))
 			} else if (isAppWifiConnected) {
-				FindDevicesCard(onFind = { homeViewModel.findEspDevices(systemIpAddress) })
+				FindDevicesCard(onFind = { showSearchFlow = true })
 				Spacer(modifier = Modifier.height(16.dp))
 			}
 			
@@ -283,19 +285,29 @@ fun HomeTab(
 			}
 		}
 		
-		if (scanState is UiState.Loading || scanState is UiState.Success || scanState is UiState.Error) {
-			DiscoveryDialog(
-				state = scanState,
-				onDismiss = { homeViewModel.resetScanState() },
-				onSelectDevice = { device ->
-					ApiPath.LOCAL_WIFI_IP_URL = device.ip
-					ApiPath.SELECTED_DEVICE_NAME = device.name
-					selectedDeviceIp = device.ip
-					selectedDeviceName = device.name
-					homeViewModel.resetScanState()
-					homeViewModel.fetchStatus()
+		if (showSearchFlow) {
+			Dialog(
+				onDismissRequest = { showSearchFlow = false },
+				properties = DialogProperties(usePlatformDefaultWidth = false)
+			) {
+				Surface(modifier = Modifier.fillMaxSize()) {
+					SearchDeviceScreen(
+						onClose = { showSearchFlow = false },
+						onAddManually = {
+							showSearchFlow = false
+							showAddDeviceDialog = true
+						},
+						onDeviceSelected = { name, ip ->
+							selectedDeviceName = name
+							selectedDeviceIp = ip
+							ApiPath.SELECTED_DEVICE_NAME = name
+							ApiPath.LOCAL_WIFI_IP_URL = ip
+							homeViewModel.fetchStatus()
+							showSearchFlow = false
+						}
+					)
 				}
-			)
+			}
 		}
 		
 		if (showAddDeviceDialog) {

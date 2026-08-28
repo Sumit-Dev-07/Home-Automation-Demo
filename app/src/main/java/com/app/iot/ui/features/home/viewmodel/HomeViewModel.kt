@@ -27,7 +27,15 @@ data class DeviceStatus(
 
 data class DiscoveredDevice(
     val name: String,
-    val ip: String
+    val ip: String,
+    val type: String = "light"
+)
+
+enum class ConnectionStatus { IDLE, CONNECTING, CONNECTED, FAILED }
+
+data class DeviceDiscoveryStatus(
+    val device: DiscoveredDevice,
+    val connectionStatus: ConnectionStatus = ConnectionStatus.IDLE
 )
 
 private data class DiscoveryResponse(
@@ -49,6 +57,9 @@ class HomeViewModel @Inject constructor(
 
     private val _scanState = MutableStateFlow<UiState<List<DiscoveredDevice>>>(UiState.Idle)
     val scanState: StateFlow<UiState<List<DiscoveredDevice>>> = _scanState.asStateFlow()
+
+    private val _discoveryState = MutableStateFlow<List<DeviceDiscoveryStatus>>(emptyList())
+    val discoveryState: StateFlow<List<DeviceDiscoveryStatus>> = _discoveryState.asStateFlow()
 
     private val _addDeviceState = MutableStateFlow<UiState<ResponseBody>>(UiState.Idle)
     val addDeviceState: StateFlow<UiState<ResponseBody>> = _addDeviceState.asStateFlow()
@@ -239,7 +250,25 @@ class HomeViewModel @Inject constructor(
                 if (discovered.isEmpty()) {
                     _scanState.value = UiState.Error("No devices found. Check if ESP8266 is on same WiFi.")
                 } else {
-                    _scanState.value = UiState.Success(discovered.values.toList())
+                    val deviceList = discovered.values.toList()
+                    _scanState.value = UiState.Success(deviceList)
+                    
+                    // Initialize discovery state with CONNECTING for each found device
+                    _discoveryState.value = deviceList.map { 
+                        DeviceDiscoveryStatus(it, ConnectionStatus.CONNECTING) 
+                    }
+                    
+                    // Simulate individual connections
+                    deviceList.forEachIndexed { index, device ->
+                        launch {
+                            delay((1000..3000).random().toLong())
+                            val isSuccess = (0..10).random() > 2 // 80% success rate
+                            updateDeviceConnectionStatus(
+                                device.ip, 
+                                if (isSuccess) ConnectionStatus.CONNECTED else ConnectionStatus.FAILED
+                            )
+                        }
+                    }
                 }
 
             } catch (e: Exception) {
@@ -252,6 +281,22 @@ class HomeViewModel @Inject constructor(
 
     fun resetScanState() {
         _scanState.value = UiState.Idle
+        _discoveryState.value = emptyList()
+    }
+
+    private fun updateDeviceConnectionStatus(ip: String, status: ConnectionStatus) {
+        _discoveryState.value = _discoveryState.value.map {
+            if (it.device.ip == ip) it.copy(connectionStatus = status) else it
+        }
+    }
+
+    fun retryConnection(ip: String) {
+        val deviceStatus = _discoveryState.value.find { it.device.ip == ip } ?: return
+        updateDeviceConnectionStatus(ip, ConnectionStatus.CONNECTING)
+        viewModelScope.launch {
+            delay(2000)
+            updateDeviceConnectionStatus(ip, ConnectionStatus.CONNECTED)
+        }
     }
 
     fun clearDevices() {
