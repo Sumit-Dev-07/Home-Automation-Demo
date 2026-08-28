@@ -82,6 +82,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.app.iot.R
 import com.app.iot.data.ApiPath
 import com.app.iot.ui.features.home.search.SearchDeviceScreen
+import com.app.iot.ui.features.home.tab.components.HorizontalOnOffToggle
 import com.app.iot.ui.features.home.tab.components.VerticalOnOffToggle
 import com.app.iot.ui.features.home.tab.components.WifiStatusHeader
 import com.app.iot.ui.features.home.viewmodel.DeviceStatus
@@ -771,7 +772,7 @@ fun DeviceItem(
                     .padding(16.dp)
                     .fillMaxSize(),
 				horizontalArrangement = Arrangement.SpaceBetween,
-				verticalAlignment = Alignment.CenterVertically
+				verticalAlignment = Alignment.Top
 			) {
 				Column(
 					modifier = Modifier.weight(1f).fillMaxHeight(),
@@ -790,7 +791,7 @@ fun DeviceItem(
 						Text(
 							text = device.name,
 							fontFamily = AppFont.onestSemiBold,
-							fontSize = 16.sp,
+							fontSize = 18.sp,
 							color = if (!device.isConnected) AppPalette.darkRed else AppPalette.black
 						)
 						
@@ -809,15 +810,21 @@ fun DeviceItem(
 							Spacer(modifier = Modifier.width(6.dp))
 							Text(
 								text = if (device.isConnected) "Active" else "Inactive",
-								fontFamily = AppFont.onestRegular,
-								fontSize = 11.sp,
+								fontFamily = AppFont.onestMedium,
+								fontSize = 12.sp,
 								color = if (device.isConnected) AppPalette.green else AppPalette.red
 							)
 						}
 					}
 				}
+				
+				VerticalOnOffToggle(
+					isOn = device.isOn,
+					onStatusChange = onCheckedChange,
+					enabled = device.isConnected,
+				)
                 
-                Column(
+                /*Column(
                     modifier = Modifier.fillMaxHeight(),
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.SpaceBetween
@@ -841,7 +848,7 @@ fun DeviceItem(
                     }
                     
                     
-                }
+                }*/
 			}
 		}
 	}

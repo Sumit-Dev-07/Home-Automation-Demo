@@ -16,6 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -34,12 +36,13 @@ fun VerticalOnOffToggle(
     //val containerWidth = 56.dp
     //val containerHeight = 110.dp
     val containerWidth = 40.dp
-    val containerHeight = 64.dp
+    val containerHeight = 72.dp
     val innerPadding = 4.dp
     val itemHeight = (containerHeight - (innerPadding * 2)) / 2
     val cornerRadius = 6.dp
     val innerCornerRadius = 6.dp
 
+    //val haptic = LocalHapticFeedback.current
     val interactionSource = remember { MutableInteractionSource() }
 
     val indicatorOffset by animateDpAsState(
@@ -49,7 +52,7 @@ fun VerticalOnOffToggle(
     )
 
     val indicatorColor by animateColorAsState(
-        targetValue = if (isOn) AppPalette.primary else AppPalette.borderGray.copy(alpha = 0.5f),
+        targetValue = if (isOn) AppPalette.primary else AppPalette.borderGray.copy(alpha = 0.8f),
         animationSpec = tween(durationMillis = 300),
         label = "indicatorColor"
     )
@@ -76,6 +79,7 @@ fun VerticalOnOffToggle(
                 indication = null,
                 enabled = enabled
             ) {
+                //haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 onStatusChange(!isOn)
             }
             .padding(innerPadding)
