@@ -83,6 +83,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.app.iot.R
 import com.app.iot.data.ApiPath
 import com.app.iot.ui.features.home.search.SearchDeviceScreen
+import com.app.iot.ui.features.home.tab.components.DeviceDetailSheet
 import com.app.iot.ui.features.home.tab.components.HorizontalOnOffToggle
 import com.app.iot.ui.features.home.tab.components.VerticalOnOffToggle
 import com.app.iot.ui.features.home.tab.components.WifiStatusHeader
@@ -120,6 +121,7 @@ fun HomeTab(
 	var showWifiDialog by remember { mutableStateOf(false) }
 	var showSearchFlow by remember { mutableStateOf(false) }
 	var deviceToDelete by remember { mutableStateOf<DeviceStatus?>(null) }
+	var deviceForDetail by remember { mutableStateOf<DeviceStatus?>(null) }
 	
 	val ledState by homeViewModel.ledState.collectAsState()
 	val statusState by homeViewModel.statusState.collectAsState()
@@ -246,6 +248,9 @@ fun HomeTab(
 							},
 							onDelete = {
 								deviceToDelete = device
+							},
+							onClick = {
+								deviceForDetail = device
 							}
 						)
 					}
@@ -378,6 +383,13 @@ fun HomeTab(
 					homeViewModel.removeDevice(device.name)
 					deviceToDelete = null
 				}
+			)
+		}
+
+		deviceForDetail?.let { device ->
+			DeviceDetailSheet(
+				deviceName = device.name,
+				onDismiss = { deviceForDetail = null }
 			)
 		}
 	}
@@ -717,7 +729,8 @@ fun DiscoveryDialog(
 fun DeviceItem(
 	device: DeviceStatus,
 	onCheckedChange: (Boolean) -> Unit,
-	onDelete: () -> Unit
+	onDelete: () -> Unit,
+	onClick: () -> Unit
 ) {
 	val outerCornerRadius = 28.dp
 	val innerCornerRadius = 24.dp
@@ -752,7 +765,8 @@ fun DeviceItem(
 			modifier = Modifier
                 .fillMaxSize()
                 .padding(gap)
-                .clip(RoundedCornerShape(innerCornerRadius)),
+                .clip(RoundedCornerShape(innerCornerRadius))
+				.clickable(onClick = onClick),
 			color = AppPalette.white
 		) {
 			Row(
@@ -1233,17 +1247,20 @@ private fun DeviceItemPreview() {
         DeviceItem(
             device = DeviceStatus(name = "Living Room Light", isOn = true, isConnected = true, ipAddress = "1.1.1.1"),
             onCheckedChange = {},
-            onDelete = {}
+            onDelete = {},
+            onClick = {}
         )
         DeviceItem(
             device = DeviceStatus(name = "Bedroom Light", isOn = false, isConnected = true, ipAddress = "1.1.1.2"),
             onCheckedChange = {},
-            onDelete = {}
+            onDelete = {},
+            onClick = {}
         )
         DeviceItem(
             device = DeviceStatus(name = "Kitchen Light", isOn = false, isConnected = false, ipAddress = "1.1.1.3"),
             onCheckedChange = {},
-            onDelete = {}
+            onDelete = {},
+            onClick = {}
         )
     }
 }
