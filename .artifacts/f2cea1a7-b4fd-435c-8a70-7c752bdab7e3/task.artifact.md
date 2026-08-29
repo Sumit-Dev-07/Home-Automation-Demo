@@ -1,0 +1,3 @@
+- [ ] Create `SettingsTab.kt` with modern UI components.
+- [ ] Integrate `SettingsTab` into `HomeScreen.kt`.
+- [ ] Verify the implementation.

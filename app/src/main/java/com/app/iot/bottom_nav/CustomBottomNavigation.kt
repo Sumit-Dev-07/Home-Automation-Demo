@@ -29,7 +29,7 @@ fun CustomBottomNavigation(
         NavigationItem("Schedule", R.drawable.ic_active_clock, R.drawable.ic_clock),
         NavigationItem("Cart", R.drawable.cart_active, R.drawable.cart_inactive),
         NavigationItem("Favorite", R.drawable.fav_active, R.drawable.fav_inactive),
-        NavigationItem("Profile", R.drawable.user_active, R.drawable.user_inactive)
+        NavigationItem("Setting", R.drawable.setting_active, R.drawable.setting)
     )
 
     val orangeColor = AppPalette.primary

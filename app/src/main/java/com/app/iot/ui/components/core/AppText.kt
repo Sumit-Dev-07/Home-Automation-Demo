@@ -11,6 +11,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.TextUnit
 import com.app.iot.ui.theme.AppPreview
 import com.app.iot.ui.theme.AppFont
 
@@ -26,12 +27,14 @@ fun AppText(
     textAlign: TextAlign = TextAlign.Start,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
-    fontFamily: FontFamily = AppFont.onestRegular
+    fontFamily: FontFamily = AppFont.onestRegular,
+    fontSize : TextUnit = TextUnit.Unspecified
 ) {
     Text(
         text = text,
         modifier = modifier,
         style = style.copy(fontFamily = fontFamily),
+        fontSize = fontSize,
         color = color,
         textAlign = textAlign,
         maxLines = maxLines,

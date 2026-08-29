@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.app.iot.bottom_nav.CustomBottomNavigation
 import com.app.iot.ui.features.home.tab.HomeTab
+import com.app.iot.ui.features.home.tab.SettingTab
 import com.app.iot.ui.theme.AppPalette
 import com.app.iot.ui.theme.AppPreview
 
@@ -96,7 +97,7 @@ fun HomeScreen() {
 							1 -> BaseContent("Search", innerPadding)
 							2 -> BaseContent("Cart", innerPadding)
 							3 -> BaseContent("Favorite", innerPadding)
-							4 -> BaseContent("Profile", innerPadding)
+							4 -> SettingTab(innerPadding)
 						}
 					}
 				}
