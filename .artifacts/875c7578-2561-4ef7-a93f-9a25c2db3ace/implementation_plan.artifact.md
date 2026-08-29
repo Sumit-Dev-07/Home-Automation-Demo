@@ -1,33 +1,28 @@
-# Create Settings Page UI
+# Refactor AppText to Object-Based Component
 
-Implement a settings screen with the requested options, following the visual style provided in the reference image.
+Refactor the `AppText` component to provide a structured API using sub-components for different font weights, ensuring consistent usage of the `AppFont` family.
 
 ## Proposed Changes
 
 ### UI Components
 
-#### [NEW] [SettingTab.kt](file:///C:/Users/sumit/Documents/WorkGround/Home-Automation-Demo/app/src/main/java/com/app/iot/ui/features/home/tab/SettingTab.kt)
-- Create a new `SettingTab` composable.
-- Define a `SettingItem` data class to represent each setting option.
-- Implement a `SettingSection` composable to group items with a header.
-- Implement a `SettingRow` composable for individual list items, featuring:
-    - An icon on the left.
-    - Title text.
-    - A chevron-right icon on the right.
-    - Clickable behavior.
-- Organize items into logical sections:
-    - **Connectivity & Devices**: Wifi setting, Manage devices, Search Devices.
-    - **App Preferences**: Theme color.
-    - **Support & Info**: Privacy, About us.
-- Use `AppPalette` and `AppFont` for consistency with the existing design.
-
-#### [MODIFY] [HomeScreen.kt](file:///C:/Users/sumit/Documents/WorkGround/Home-Automation-Demo/app/src/main/java/com/app/iot/ui/features/home/screen/HomeScreen.kt)
-- Replace the placeholder `BaseContent("Setting", innerPadding)` with the new `SettingTab(innerPadding)`.
+#### [MODIFY] [AppText.kt](file:///C:/Users/sumit/Documents/WorkGround/Home-Automation-Demo/app/src/main/java/com/app/iot/ui/components/core/AppText.kt)
+- Convert `AppText` from a top-level function to an `object`.
+- Implement a private base composable `TextBase` to handle common logic.
+- Add the following composable functions to the `AppText` object:
+    - `Light`: Uses `AppFont.onestLight`.
+    - `Normal`: Uses `AppFont.onestRegular`.
+    - `Medium`: Uses `AppFont.onestMedium`.
+    - `SemiBold`: Uses `AppFont.onestSemiBold`.
+    - `Bold`: Uses `AppFont.onestBold`.
+- Each function will accept standard parameters like `text`, `modifier`, `color`, `fontSize`, `textAlign`, `maxLines`, and `overflow`.
+- Retain existing helper components like `TitleText`, `MediumTitleText`, and `ErrorTextInputField` but refactor them to use the new `AppText` object methods.
 
 ## Verification Plan
 
+### Automated Tests
+- Run `app:assembleDebug` to ensure no compilation errors are introduced by the refactoring.
+
 ### Manual Verification
-- Deploy the app to a device or emulator.
-- Navigate to the "Setting" tab using the bottom navigation.
-- Verify that all requested options are displayed and grouped correctly.
-- Ensure the UI matches the reference image's style (rounded corners, white cards, spacing).
+- Update the `AppTextFontsPreview` in `AppText.kt` to use the new `AppText.Normal`, `AppText.Medium`, etc., and verify the preview renders correctly in Android Studio.
+- Verify that other screens (like `SettingTab`) still compile if they were using the previous `AppText` (or update them if necessary).

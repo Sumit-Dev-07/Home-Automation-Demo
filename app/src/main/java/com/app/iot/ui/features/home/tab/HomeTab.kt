@@ -58,6 +58,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import com.app.iot.ui.components.core.AppText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -88,7 +89,6 @@ import com.app.iot.ui.features.home.tab.components.WifiStatusHeader
 import com.app.iot.ui.features.home.viewmodel.DeviceStatus
 import com.app.iot.ui.features.home.viewmodel.DiscoveredDevice
 import com.app.iot.ui.features.home.viewmodel.HomeViewModel
-import com.app.iot.ui.theme.AppFont
 import com.app.iot.ui.theme.AppPalette
 import com.app.iot.util.UiState
 import com.app.iot.util.isPreview
@@ -437,15 +437,13 @@ fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
 					)
 					Spacer(modifier = Modifier.width(16.dp))
 					Column {
-						Text(
+						AppText.SemiBold(
 							text = name,
-							fontFamily = AppFont.onestSemiBold,
 							fontSize = 16.sp,
 							color = AppPalette.black
 						)
-						Text(
+						AppText.Normal(
 							text = "IP: $ipAddress",
-							fontFamily = AppFont.onestRegular,
 							fontSize = 12.sp,
 							color = AppPalette.gray
 						)
@@ -453,9 +451,8 @@ fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
 				}
 				
 				TextButton(onClick = onChange) {
-					Text(
+					AppText.SemiBold(
 						text = "Change",
-						fontFamily = AppFont.onestSemiBold,
 						fontSize = 12.sp,
 						color = AppPalette.primary
 					)
@@ -518,15 +515,13 @@ fun FindDevicesCard(onFind: () -> Unit) {
 					)
 					Spacer(modifier = Modifier.width(16.dp))
 					Column {
-						Text(
+						AppText.SemiBold(
 							text = "Find Devices",
-							fontFamily = AppFont.onestSemiBold,
 							fontSize = 16.sp,
 							color = AppPalette.black
 						)
-						Text(
+						AppText.Normal(
 							text = "Scan network for ESP devices",
-							fontFamily = AppFont.onestRegular,
 							fontSize = 12.sp,
 							color = AppPalette.gray
 						)
@@ -541,9 +536,8 @@ fun FindDevicesCard(onFind: () -> Unit) {
 					shape = RoundedCornerShape(12.dp),
 					contentPadding = PaddingValues(horizontal = 16.dp)
 				) {
-					Text(
+					AppText.Medium(
 						text = "Scan",
-						fontFamily = AppFont.onestMedium,
 						fontSize = 14.sp,
 						color = AppPalette.white
 					)
@@ -605,9 +599,8 @@ fun DiscoveryDialog(
                         .fillMaxWidth(),
 					horizontalAlignment = Alignment.CenterHorizontally
 				) {
-					Text(
+					AppText.Bold(
 						text = "Scanning Network",
-						fontFamily = AppFont.onestBold,
 						fontSize = 18.sp,
 						color = AppPalette.black
 					)
@@ -629,9 +622,8 @@ fun DiscoveryDialog(
 										modifier = Modifier.size(40.dp)
 									)
 									Spacer(modifier = Modifier.height(16.dp))
-									Text(
-										"Searching for ESP devices...",
-										fontFamily = AppFont.onestRegular,
+									AppText.Normal(
+										text = "Searching for ESP devices...",
 										fontSize = 14.sp,
 										color = AppPalette.gray
 									)
@@ -665,15 +657,13 @@ fun DiscoveryDialog(
 												)
 												Spacer(modifier = Modifier.width(12.dp))
 												Column {
-													Text(
+													AppText.Medium(
 														text = device.name,
-														fontFamily = AppFont.onestMedium,
 														fontSize = 14.sp,
 														color = AppPalette.darkGray
 													)
-													Text(
+													AppText.Normal(
 														text = device.ip,
-														fontFamily = AppFont.onestRegular,
 														fontSize = 11.sp,
 														color = AppPalette.gray
 													)
@@ -685,9 +675,8 @@ fun DiscoveryDialog(
 							}
 							
 							is UiState.Error -> {
-								Text(
-									state.message,
-									fontFamily = AppFont.onestRegular,
+								AppText.Normal(
+									text = state.message,
 									fontSize = 14.sp,
 									color = AppPalette.red,
 									textAlign = TextAlign.Center
@@ -704,9 +693,8 @@ fun DiscoveryDialog(
 						onClick = onDismiss,
 						modifier = Modifier.align(Alignment.End)
 					) {
-						Text(
-							"Close",
-							fontFamily = AppFont.onestSemiBold,
+						AppText.SemiBold(
+							text = "Close",
 							fontSize = 14.sp,
 							color = AppPalette.primary
 						)
@@ -788,9 +776,8 @@ fun DeviceItem(
 					)
 					
 					Column {
-						Text(
+						AppText.SemiBold(
 							text = device.name,
-							fontFamily = AppFont.onestSemiBold,
 							fontSize = 18.sp,
 							color = if (!device.isConnected) AppPalette.darkRed else AppPalette.black
 						)
@@ -808,9 +795,8 @@ fun DeviceItem(
                                     )
 							)
 							Spacer(modifier = Modifier.width(6.dp))
-							Text(
+							AppText.Medium(
 								text = if (device.isConnected) "Active" else "Inactive",
-								fontFamily = AppFont.onestMedium,
 								fontSize = 12.sp,
 								color = if (device.isConnected) AppPalette.green else AppPalette.red
 							)
@@ -907,9 +893,8 @@ fun AddDeviceDialog(
 					modifier = Modifier.padding(24.dp),
 					horizontalAlignment = Alignment.CenterHorizontally
 				) {
-					Text(
+					AppText.Bold(
 						text = "Add New Device",
-						fontFamily = AppFont.onestBold,
 						fontSize = 20.sp,
 						color = AppPalette.black
 					)
@@ -919,7 +904,7 @@ fun AddDeviceDialog(
 					OutlinedTextField(
 						value = name,
 						onValueChange = { name = it },
-						label = { Text("Device Name", fontFamily = AppFont.onestRegular) },
+						label = { AppText.Normal(text = "Device Name") },
 						modifier = Modifier.fillMaxWidth(),
 						shape = RoundedCornerShape(12.dp),
 						colors = OutlinedTextFieldDefaults.colors(
@@ -957,7 +942,7 @@ fun AddDeviceDialog(
 							horizontalArrangement = Arrangement.End
 						) {
 							TextButton(onClick = onDismiss) {
-								Text("Cancel", color = AppPalette.gray, fontFamily = AppFont.onestMedium)
+								AppText.Medium(text = "Cancel", color = AppPalette.gray)
 							}
 							Spacer(modifier = Modifier.width(8.dp))
 							Button(
@@ -972,7 +957,7 @@ fun AddDeviceDialog(
 								colors = ButtonDefaults.buttonColors(containerColor = AppPalette.primary),
 								shape = RoundedCornerShape(12.dp)
 							) {
-								Text("Add Device", fontFamily = AppFont.onestMedium)
+								AppText.Medium(text = "Add Device")
 							}
 						}
 					}
@@ -1008,7 +993,7 @@ fun PinDropdown(
 			value = selectedPin,
 			onValueChange = {},
 			readOnly = true,
-			label = { Text(label, fontFamily = AppFont.onestRegular) },
+			label = { AppText.Normal(text = label) },
 			trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
 			modifier = Modifier
                 .menuAnchor()
@@ -1026,7 +1011,7 @@ fun PinDropdown(
 		) {
 			pins.forEach { p ->
 				DropdownMenuItem(
-					text = { Text(p, fontFamily = AppFont.onestRegular) },
+					text = { AppText.Normal(text = p) },
 					onClick = {
 						onPinSelected(p)
 						expanded = false
@@ -1085,17 +1070,15 @@ fun WifiConfigDialog(
 					modifier = Modifier.padding(24.dp),
 					horizontalAlignment = Alignment.CenterHorizontally
 				) {
-					Text(
+					AppText.Bold(
 						text = "WiFi Configuration",
-						fontFamily = AppFont.onestBold,
 						fontSize = 20.sp,
 						color = AppPalette.black
 					)
 					
 					Spacer(modifier = Modifier.height(16.dp))
-					Text(
+					AppText.Normal(
 						text = "Enter new WiFi password. The device will restart and connect to current SSID with this password.",
-						fontFamily = AppFont.onestRegular,
 						fontSize = 12.sp,
 						color = AppPalette.gray,
 						textAlign = TextAlign.Center
@@ -1106,7 +1089,7 @@ fun WifiConfigDialog(
 					OutlinedTextField(
 						value = password,
 						onValueChange = { password = it },
-						label = { Text("New WiFi Password", fontFamily = AppFont.onestRegular) },
+						label = { AppText.Normal(text = "New WiFi Password") },
 						modifier = Modifier.fillMaxWidth(),
 						shape = RoundedCornerShape(12.dp),
 						colors = OutlinedTextFieldDefaults.colors(
@@ -1126,7 +1109,7 @@ fun WifiConfigDialog(
 							horizontalArrangement = Arrangement.End
 						) {
 							TextButton(onClick = onDismiss) {
-								Text("Cancel", color = AppPalette.gray, fontFamily = AppFont.onestMedium)
+								AppText.Medium(text = "Cancel", color = AppPalette.gray)
 							}
 							Spacer(modifier = Modifier.width(8.dp))
 							Button(
@@ -1135,7 +1118,7 @@ fun WifiConfigDialog(
 								colors = ButtonDefaults.buttonColors(containerColor = AppPalette.primary),
 								shape = RoundedCornerShape(12.dp)
 							) {
-								Text("Update", fontFamily = AppFont.onestMedium)
+								AppText.Medium(text = "Update")
 							}
 						}
 					}
@@ -1200,18 +1183,16 @@ fun DeleteConfirmationDialog(
 					
 					Spacer(modifier = Modifier.height(16.dp))
 					
-					Text(
+					AppText.Bold(
 						text = "Delete Device?",
-						fontFamily = AppFont.onestBold,
 						fontSize = 20.sp,
 						color = AppPalette.black
 					)
 					
 					Spacer(modifier = Modifier.height(12.dp))
 					
-					Text(
+					AppText.Normal(
 						text = "Are you sure you want to remove '$deviceName'? This action cannot be undone.",
-						fontFamily = AppFont.onestRegular,
 						fontSize = 14.sp,
 						color = AppPalette.gray,
 						textAlign = TextAlign.Center
@@ -1227,7 +1208,7 @@ fun DeleteConfirmationDialog(
 							onClick = onDismiss,
 							modifier = Modifier.weight(1f)
 						) {
-							Text("Cancel", color = AppPalette.gray, fontFamily = AppFont.onestMedium)
+							AppText.Medium(text = "Cancel", color = AppPalette.gray)
 						}
 						
 						Button(
@@ -1236,7 +1217,7 @@ fun DeleteConfirmationDialog(
 							colors = ButtonDefaults.buttonColors(containerColor = AppPalette.red),
 							shape = RoundedCornerShape(12.dp)
 						) {
-							Text("Delete", color = AppPalette.white, fontFamily = AppFont.onestMedium)
+							AppText.Medium(text = "Delete", color = AppPalette.white)
 						}
 					}
 				}

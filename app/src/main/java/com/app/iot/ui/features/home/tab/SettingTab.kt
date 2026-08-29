@@ -29,18 +29,15 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.app.iot.ui.components.core.AppText
-import com.app.iot.ui.theme.AppFont
 import com.app.iot.ui.theme.AppPalette
 import com.app.iot.ui.theme.AppPreview
 
@@ -56,15 +53,13 @@ fun SettingTab(innerPadding: PaddingValues) {
     ) {
         item {
             Column {
-                Text(
+                AppText.Bold(
                     text = "Settings",
-                    fontFamily = AppFont.onestBold,
                     fontSize = 28.sp,
                     color = AppPalette.white
                 )
-                Text(
+                AppText.Normal(
                     text = "Manage your account and app preferences",
-                    fontFamily = AppFont.onestRegular,
                     fontSize = 14.sp,
                     color = AppPalette.white
                 )
@@ -123,16 +118,14 @@ fun LastSyncCard() {
                 tint = AppPalette.gray
             )
             Spacer(modifier = Modifier.width(12.dp))
-            Text(
+            AppText.Medium(
                 text = "Last Sync",
-                fontFamily = AppFont.onestMedium,
                 fontSize = 16.sp,
                 color = AppPalette.black
             )
         }
-        Text(
+        AppText.Normal(
             text = "August 19, 2026 at 12:07 PM",
-            fontFamily = AppFont.onestRegular,
             fontSize = 14.sp,
             color = AppPalette.primary
         )
@@ -149,9 +142,8 @@ fun SettingSection(
     val gap = 6.dp
     
     Column {
-        AppText(
+        AppText.Bold(
             text = title,
-            fontFamily = AppFont.onestBold,
             fontSize = 16.sp,
             color = AppPalette.white,
             modifier = Modifier.padding(bottom = 12.dp)
@@ -211,17 +203,15 @@ fun SettingRow(
             tint = AppPalette.gray
         )
         Spacer(modifier = Modifier.width(16.dp))
-        Text(
+        AppText.Medium(
             text = item.title,
-            fontFamily = AppFont.onestMedium,
             fontSize = 16.sp,
             color = AppPalette.black,
             modifier = Modifier.weight(1f)
         )
         if (item.trailingText != null) {
-            Text(
+            AppText.Normal(
                 text = item.trailingText,
-                fontFamily = AppFont.onestRegular,
                 fontSize = 14.sp,
                 color = AppPalette.primary,
                 modifier = Modifier.padding(end = 8.dp)

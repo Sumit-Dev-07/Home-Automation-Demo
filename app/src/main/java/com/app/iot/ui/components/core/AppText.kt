@@ -16,30 +16,93 @@ import com.app.iot.ui.theme.AppPreview
 import com.app.iot.ui.theme.AppFont
 
 /**
- * A reusable Text component that uses the project's default font family.
+ * Reusable Text components using the project's font family.
  */
-@Composable
-fun AppText(
-    text: String,
-    modifier: Modifier = Modifier,
-    style: TextStyle = MaterialTheme.typography.bodyMedium,
-    color: Color = Color.Unspecified,
-    textAlign: TextAlign = TextAlign.Start,
-    maxLines: Int = Int.MAX_VALUE,
-    overflow: TextOverflow = TextOverflow.Clip,
-    fontFamily: FontFamily = AppFont.onestRegular,
-    fontSize : TextUnit = TextUnit.Unspecified
-) {
-    Text(
-        text = text,
-        modifier = modifier,
-        style = style.copy(fontFamily = fontFamily),
-        fontSize = fontSize,
-        color = color,
-        textAlign = textAlign,
-        maxLines = maxLines,
-        overflow = overflow
-    )
+object AppText {
+
+    @Composable
+    private fun TextBase(
+        text: String,
+        modifier: Modifier = Modifier,
+        style: TextStyle = MaterialTheme.typography.bodyMedium,
+        color: Color = Color.Unspecified,
+        textAlign: TextAlign = TextAlign.Start,
+        maxLines: Int = Int.MAX_VALUE,
+        overflow: TextOverflow = TextOverflow.Clip,
+        fontFamily: FontFamily,
+        fontSize: TextUnit = TextUnit.Unspecified
+    ) {
+        Text(
+            text = text,
+            modifier = modifier,
+            style = style.copy(fontFamily = fontFamily),
+            fontSize = fontSize,
+            color = color,
+            textAlign = textAlign,
+            maxLines = maxLines,
+            overflow = overflow
+        )
+    }
+
+    @Composable
+    fun Light(
+        text: String,
+        modifier: Modifier = Modifier,
+        style: TextStyle = MaterialTheme.typography.bodyMedium,
+        color: Color = Color.Unspecified,
+        textAlign: TextAlign = TextAlign.Start,
+        maxLines: Int = Int.MAX_VALUE,
+        overflow: TextOverflow = TextOverflow.Clip,
+        fontSize: TextUnit = TextUnit.Unspecified
+    ) = TextBase(text, modifier, style, color, textAlign, maxLines, overflow, AppFont.onestLight, fontSize)
+
+    @Composable
+    fun Normal(
+        text: String,
+        modifier: Modifier = Modifier,
+        style: TextStyle = MaterialTheme.typography.bodyMedium,
+        color: Color = Color.Unspecified,
+        textAlign: TextAlign = TextAlign.Start,
+        maxLines: Int = Int.MAX_VALUE,
+        overflow: TextOverflow = TextOverflow.Clip,
+        fontSize: TextUnit = TextUnit.Unspecified
+    ) = TextBase(text, modifier, style, color, textAlign, maxLines, overflow, AppFont.onestRegular, fontSize)
+
+    @Composable
+    fun Medium(
+        text: String,
+        modifier: Modifier = Modifier,
+        style: TextStyle = MaterialTheme.typography.bodyMedium,
+        color: Color = Color.Unspecified,
+        textAlign: TextAlign = TextAlign.Start,
+        maxLines: Int = Int.MAX_VALUE,
+        overflow: TextOverflow = TextOverflow.Clip,
+        fontSize: TextUnit = TextUnit.Unspecified
+    ) = TextBase(text, modifier, style, color, textAlign, maxLines, overflow, AppFont.onestMedium, fontSize)
+
+    @Composable
+    fun SemiBold(
+        text: String,
+        modifier: Modifier = Modifier,
+        style: TextStyle = MaterialTheme.typography.bodyMedium,
+        color: Color = Color.Unspecified,
+        textAlign: TextAlign = TextAlign.Start,
+        maxLines: Int = Int.MAX_VALUE,
+        overflow: TextOverflow = TextOverflow.Clip,
+        fontSize: TextUnit = TextUnit.Unspecified
+    ) = TextBase(text, modifier, style, color, textAlign, maxLines, overflow, AppFont.onestSemiBold, fontSize)
+
+    @Composable
+    fun Bold(
+        text: String,
+        modifier: Modifier = Modifier,
+        style: TextStyle = MaterialTheme.typography.bodyMedium,
+        color: Color = Color.Unspecified,
+        textAlign: TextAlign = TextAlign.Start,
+        maxLines: Int = Int.MAX_VALUE,
+        overflow: TextOverflow = TextOverflow.Clip,
+        fontSize: TextUnit = TextUnit.Unspecified
+    ) = TextBase(text, modifier, style, color, textAlign, maxLines, overflow, AppFont.onestBold, fontSize)
 }
 
 @Composable
@@ -48,7 +111,7 @@ fun TitleText(
     text: String,
     textAlign: TextAlign = TextAlign.Start
 ) {
-    AppText(
+    AppText.Bold(
         modifier = modifier,
         text = text,
         textAlign = textAlign,
@@ -63,7 +126,7 @@ fun MediumTitleText(
     text: String,
     textAlign: TextAlign = TextAlign.Start
 ) {
-    AppText(
+    AppText.SemiBold(
         modifier = modifier,
         text = text,
         style = MaterialTheme.typography.headlineMedium,
@@ -77,7 +140,7 @@ fun ErrorTextInputField(
     modifier: Modifier = Modifier,
     text: String
 ) {
-    AppText(
+    AppText.Normal(
         modifier = modifier,
         text = text,
         style = MaterialTheme.typography.bodyMedium,
@@ -90,11 +153,11 @@ fun ErrorTextInputField(
 fun AppTextFontsPreview() {
     AppPreview {
         Column {
-            AppText(text = "Onest Light", fontFamily = AppFont.onestLight)
-            AppText(text = "Onest Regular", fontFamily = AppFont.onestRegular)
-            AppText(text = "Onest Medium", fontFamily = AppFont.onestMedium)
-            AppText(text = "Onest SemiBold", fontFamily = AppFont.onestSemiBold)
-            AppText(text = "Onest Bold", fontFamily = AppFont.onestBold)
+            AppText.Light(text = "Onest Light")
+            AppText.Normal(text = "Onest Regular")
+            AppText.Medium(text = "Onest Medium")
+            AppText.SemiBold(text = "Onest SemiBold")
+            AppText.Bold(text = "Onest Bold")
         }
     }
 }

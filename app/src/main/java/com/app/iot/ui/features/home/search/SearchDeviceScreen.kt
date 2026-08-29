@@ -23,7 +23,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,13 +41,13 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.app.iot.ui.components.CommonTopAppBar
+import com.app.iot.ui.components.core.AppText
 import com.app.iot.ui.features.home.search.components.DiscoveryList
 import com.app.iot.ui.features.home.search.components.RadarGraphic
 import com.app.iot.ui.features.home.viewmodel.ConnectionStatus
 import com.app.iot.ui.features.home.viewmodel.DeviceDiscoveryStatus
 import com.app.iot.ui.features.home.viewmodel.DiscoveredDevice
 import com.app.iot.ui.features.home.viewmodel.HomeViewModel
-import com.app.iot.ui.theme.AppFont
 import com.app.iot.ui.theme.AppPalette
 import com.app.iot.ui.theme.AppPreview
 import com.app.iot.util.UiState
@@ -232,18 +231,16 @@ private fun SearchDeviceContent(
 
 			Spacer(modifier = Modifier.height(16.dp))
 
-			Text(
+			AppText.Bold(
 				text = title,
-				fontFamily = AppFont.onestBold,
 				fontSize = 24.sp,
 				color = AppPalette.black
 			)
 
 			Spacer(modifier = Modifier.height(8.dp))
 
-			Text(
+			AppText.Normal(
 				text = description,
-				fontFamily = AppFont.onestRegular,
 				fontSize = 14.sp,
 				color = AppPalette.gray,
 				textAlign = TextAlign.Center
@@ -251,18 +248,16 @@ private fun SearchDeviceContent(
 
 			if (!permissionMessage.isNullOrEmpty() && step == SearchFlowStep.INITIAL) {
 				Spacer(modifier = Modifier.height(12.dp))
-				Text(
+				AppText.Normal(
 					text = permissionMessage,
-					fontFamily = AppFont.onestRegular,
 					fontSize = 12.sp,
 					color = AppPalette.red,
 					textAlign = TextAlign.Center
 				)
 				if (showOpenSettings) {
 					TextButton(onClick = onOpenSettings) {
-						Text(
+						AppText.SemiBold(
 							text = "Open settings",
-							fontFamily = AppFont.onestSemiBold,
 							fontSize = 12.sp,
 							color = AppPalette.secondary
 						)
@@ -301,10 +296,9 @@ private fun SearchDeviceContent(
 							colors = ButtonDefaults.buttonColors(containerColor = AppPalette.secondary),
 							shape = buttonShape
 						) {
-							Text(
+							AppText.Medium(
 								text = if (hasNearbyPermissions) "Start Scan" else "Allow and Continue",
 								color = AppPalette.white,
-								fontFamily = AppFont.onestMedium,
 								fontSize = 14.sp
 							)
 						}
@@ -318,10 +312,9 @@ private fun SearchDeviceContent(
 							border = BorderStroke(1.dp, AppPalette.secondary),
 							colors = ButtonDefaults.outlinedButtonColors(contentColor = AppPalette.secondary)
 						) {
-							Text(
+							AppText.Medium(
 								text = "Add Manually",
 								color = AppPalette.secondary,
-								fontFamily = AppFont.onestMedium,
 								fontSize = 14.sp
 							)
 						}
@@ -337,10 +330,9 @@ private fun SearchDeviceContent(
 							border = BorderStroke(1.dp, AppPalette.secondary),
 							colors = ButtonDefaults.outlinedButtonColors(contentColor = AppPalette.black)
 						) {
-							Text(
+							AppText.Medium(
 								text = "Stop Scanning",
 								color = AppPalette.black,
-								fontFamily = AppFont.onestMedium,
 								fontSize = 14.sp
 							)
 						}
@@ -355,10 +347,9 @@ private fun SearchDeviceContent(
 							colors = ButtonDefaults.buttonColors(containerColor = AppPalette.secondary),
 							shape = buttonShape
 						) {
-							Text(
+							AppText.Medium(
 								text = "Continue",
 								color = AppPalette.white,
-								fontFamily = AppFont.onestMedium,
 								fontSize = 14.sp
 							)
 						}
@@ -372,10 +363,9 @@ private fun SearchDeviceContent(
 							border = BorderStroke(1.dp, AppPalette.secondary),
 							colors = ButtonDefaults.outlinedButtonColors(contentColor = AppPalette.secondary)
 						) {
-							Text(
+							AppText.Medium(
 								text = "Scan again",
 								color = AppPalette.secondary,
-								fontFamily = AppFont.onestMedium,
 								fontSize = 14.sp
 							)
 						}
@@ -383,9 +373,8 @@ private fun SearchDeviceContent(
 				}
 
 				if (step == SearchFlowStep.INITIAL) {
-					Text(
+					AppText.Normal(
 						text = "Make sure you have one or more smart devices that support WI-FI or Bluetooth",
-						fontFamily = AppFont.onestRegular,
 						fontSize = 12.sp,
 						color = AppPalette.gray,
 						textAlign = TextAlign.Center,

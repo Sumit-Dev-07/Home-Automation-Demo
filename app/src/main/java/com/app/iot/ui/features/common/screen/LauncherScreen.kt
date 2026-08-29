@@ -33,7 +33,6 @@ import com.app.iot.data.ApiPath
 import com.app.iot.ui.components.core.AppImage
 import com.app.iot.ui.components.core.AppText
 import com.app.iot.ui.features.home.viewmodel.HomeViewModel
-import com.app.iot.ui.theme.AppFont
 import com.app.iot.ui.theme.AppPalette
 import com.app.iot.ui.theme.AppPreview
 import com.app.iot.util.UiState
@@ -151,9 +150,8 @@ fun LauncherContent() {
 					size = 24.dp
 				)
 				Spacer(modifier = Modifier.height(12.dp))
-				AppText(
+				AppText.Medium(
 					text = "Version ${BuildConfig.VERSION_NAME}",
-					fontFamily = AppFont.onestMedium,
 					color = AppPalette.gray,
 				)
 			}
