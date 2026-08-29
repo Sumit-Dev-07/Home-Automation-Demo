@@ -18,10 +18,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,6 +37,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.app.iot.ui.components.CommonTopAppBar
+import com.app.iot.ui.components.core.AppCommonButton
+import com.app.iot.ui.components.core.AppOutlineButton
 import com.app.iot.ui.components.core.AppText
 import com.app.iot.ui.features.home.search.components.DiscoveryList
 import com.app.iot.ui.features.home.search.components.RadarGraphic
@@ -204,8 +202,6 @@ private fun SearchDeviceContent(
 		SearchFlowStep.RESULTS -> "If you are unable to see your device. Please scan again"
 	}
 
-	val buttonShape = RoundedCornerShape(12.dp)
-
 	Scaffold(
 		topBar = {
 			CommonTopAppBar(
@@ -288,87 +284,34 @@ private fun SearchDeviceContent(
 			) {
 				when (step) {
 					SearchFlowStep.INITIAL -> {
-						Button(
-							onClick = onAllowAndContinue,
-							modifier = Modifier
-								.fillMaxWidth()
-								.height(56.dp),
-							colors = ButtonDefaults.buttonColors(containerColor = AppPalette.secondary),
-							shape = buttonShape
-						) {
-							AppText.Medium(
-								text = if (hasNearbyPermissions) "Start Scan" else "Allow and Continue",
-								color = AppPalette.white,
-								fontSize = 14.sp
-							)
-						}
+						AppCommonButton(
+							text = if (hasNearbyPermissions) "Start Scan" else "Allow and Continue",
+							onClick = onAllowAndContinue
+						)
 
-						OutlinedButton(
-							onClick = onAddManually,
-							modifier = Modifier
-								.fillMaxWidth()
-								.height(56.dp),
-							shape = buttonShape,
-							border = BorderStroke(1.dp, AppPalette.secondary),
-							colors = ButtonDefaults.outlinedButtonColors(contentColor = AppPalette.secondary)
-						) {
-							AppText.Medium(
-								text = "Add Manually",
-								color = AppPalette.secondary,
-								fontSize = 14.sp
-							)
-						}
+						AppOutlineButton(
+							text = "Add Manually",
+							onClick = onAddManually
+						)
 					}
 
 					SearchFlowStep.SCANNING -> {
-						OutlinedButton(
+						AppOutlineButton(
+							text = "Stop Scanning",
 							onClick = onStopScanning,
-							modifier = Modifier
-								.fillMaxWidth()
-								.height(56.dp),
-							shape = buttonShape,
-							border = BorderStroke(1.dp, AppPalette.secondary),
-							colors = ButtonDefaults.outlinedButtonColors(contentColor = AppPalette.black)
-						) {
-							AppText.Medium(
-								text = "Stop Scanning",
-								color = AppPalette.black,
-								fontSize = 14.sp
-							)
-						}
+						)
 					}
 
 					SearchFlowStep.RESULTS -> {
-						Button(
-							onClick = onContinue,
-							modifier = Modifier
-								.fillMaxWidth()
-								.height(56.dp),
-							colors = ButtonDefaults.buttonColors(containerColor = AppPalette.secondary),
-							shape = buttonShape
-						) {
-							AppText.Medium(
-								text = "Continue",
-								color = AppPalette.white,
-								fontSize = 14.sp
-							)
-						}
+						AppCommonButton(
+							text = "Continue",
+							onClick = onContinue
+						)
 
-						OutlinedButton(
-							onClick = onScanAgain,
-							modifier = Modifier
-								.fillMaxWidth()
-								.height(56.dp),
-							shape = buttonShape,
-							border = BorderStroke(1.dp, AppPalette.secondary),
-							colors = ButtonDefaults.outlinedButtonColors(contentColor = AppPalette.secondary)
-						) {
-							AppText.Medium(
-								text = "Scan again",
-								color = AppPalette.secondary,
-								fontSize = 14.sp
-							)
-						}
+						AppOutlineButton(
+							text = "Scan again",
+							onClick = onScanAgain
+						)
 					}
 				}
 

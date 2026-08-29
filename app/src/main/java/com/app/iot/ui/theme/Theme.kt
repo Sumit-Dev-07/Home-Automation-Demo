@@ -60,7 +60,7 @@ fun HomeAutomationTheme(
 }
 
 @Composable
-fun AppPreview(padding: Dp = 16.dp, color: Color = AppPalette.secondary, content: @Composable () -> Unit) {
+fun AppPreview(padding: Dp = 16.dp, color: Color = AppPalette.white, content: @Composable () -> Unit) {
 	HomeAutomationTheme {
 		Box(
 			modifier = Modifier

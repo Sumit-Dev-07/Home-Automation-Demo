@@ -1,5 +1,6 @@
 package com.app.iot.ui.features.home.search.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,9 +17,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.app.iot.ui.components.core.AppText
 import com.app.iot.ui.features.home.viewmodel.ConnectionStatus
 import com.app.iot.ui.features.home.viewmodel.DeviceDiscoveryStatus
-import com.app.iot.ui.theme.AppFont
 import com.app.iot.ui.theme.AppPalette
 
 @Composable
@@ -29,7 +30,7 @@ fun DiscoveryList(
 ) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(devices) { status ->
@@ -47,7 +48,8 @@ fun DiscoveredDeviceItem(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         color = AppPalette.white,
-        shadowElevation = 2.dp
+        shadowElevation = 2.dp,
+        border = BorderStroke(1.dp, AppPalette.secondary)
     ) {
         Row(
             modifier = Modifier
@@ -73,9 +75,8 @@ fun DiscoveredDeviceItem(
             Spacer(modifier = Modifier.width(16.dp))
             
             Column(modifier = Modifier.weight(1f)) {
-                Text(
+                AppText.SemiBold(
                     text = status.device.name,
-                    fontFamily = AppFont.onestSemiBold,
                     fontSize = 15.sp,
                     color = AppPalette.black
                 )
@@ -94,9 +95,8 @@ fun DiscoveredDeviceItem(
                     else -> AppPalette.gray
                 }
                 
-                Text(
+                AppText.Normal(
                     text = statusText,
-                    fontFamily = AppFont.onestRegular,
                     fontSize = 12.sp,
                     color = statusColor
                 )
