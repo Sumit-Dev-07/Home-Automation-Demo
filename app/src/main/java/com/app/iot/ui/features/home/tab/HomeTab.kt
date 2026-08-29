@@ -250,7 +250,7 @@ fun HomeTab(
 								deviceToDelete = device
 							},
 							onClick = {
-								deviceForDetail = device
+								//deviceForDetail = device
 							}
 						)
 					}
