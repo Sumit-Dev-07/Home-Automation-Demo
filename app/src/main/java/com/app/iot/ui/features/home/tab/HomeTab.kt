@@ -52,7 +52,6 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -61,7 +60,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import com.app.iot.ui.components.core.AppText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -73,8 +71,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -85,12 +83,13 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.app.iot.R
 import com.app.iot.data.ApiPath
+import com.app.iot.ui.components.core.AppText
 import com.app.iot.ui.features.home.search.SearchDeviceScreen
+import com.app.iot.ui.features.home.tab.components.BannerData
 import com.app.iot.ui.features.home.tab.components.DeviceDetailSheet
+import com.app.iot.ui.features.home.tab.components.HomeBannerList
 import com.app.iot.ui.features.home.tab.components.HomeHeader
-import com.app.iot.ui.features.home.tab.components.HorizontalOnOffToggle
 import com.app.iot.ui.features.home.tab.components.VerticalOnOffToggle
-import com.app.iot.ui.features.home.tab.components.WifiStatusHeader
 import com.app.iot.ui.features.home.viewmodel.DeviceStatus
 import com.app.iot.ui.features.home.viewmodel.DiscoveredDevice
 import com.app.iot.ui.features.home.viewmodel.HomeViewModel
@@ -110,7 +109,7 @@ fun HomeTab(
 		}
 		return
 	}
-
+	
 	// Safe to use viewModel here as it won't be null when not in inspection mode
 	val homeViewModel = viewModel!!
 	val context = LocalContext.current
@@ -134,6 +133,21 @@ fun HomeTab(
 	val addDeviceState by homeViewModel.addDeviceState.collectAsState()
 	val updateWifiState by homeViewModel.updateWifiState.collectAsState()
 	val removeDeviceState by homeViewModel.removeDeviceState.collectAsState()
+	
+	val banners = remember {
+		listOf(
+			BannerData(
+				"Smart Home",
+				"Optimize your energy consumption with AI.",
+				listOf(Color(0xFF1976D2), Color(0xFF64B5F6))
+			),
+			BannerData(
+				"Test",
+				"Physical therapy for body function improvement.",
+				listOf(Color(0xFF8E24AA), Color(0xFF64B5F6))
+			),
+		)
+	}
 	
 	DisposableEffect(context) {
 		val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -174,9 +188,9 @@ fun HomeTab(
 	Box(modifier = Modifier.fillMaxSize()) {
 		Column(
 			modifier = Modifier
-                .fillMaxSize()
-                .padding(top = modifier.calculateTopPadding())
-                .padding(16.dp)
+				.fillMaxSize()
+				.padding(top = modifier.calculateTopPadding())
+				.padding(16.dp)
 		) {
 			HomeHeader(isConnected = isAppWifiConnected, onDeviceClick = {
 				showSearchFlow = true
@@ -185,6 +199,13 @@ fun HomeTab(
 					Intent(Settings.ACTION_WIFI_SETTINGS)
 				)
 			})
+			
+			Spacer(modifier = Modifier.height(0.dp))
+			
+			HomeBannerList(banners = banners)
+			
+			Spacer(modifier = Modifier.height(16.dp))
+			
 			/*WifiStatusHeader(
 				isConnected = isAppWifiConnected,
 				ssid = wifiSsid,
@@ -224,8 +245,8 @@ fun HomeTab(
 					item(span = { GridItemSpan(2) }) {
 						Column(
 							modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 48.dp),
+								.fillMaxWidth()
+								.padding(vertical = 48.dp),
 							horizontalAlignment = Alignment.CenterHorizontally,
 							verticalArrangement = Arrangement.Center
 						) {
@@ -275,11 +296,11 @@ fun HomeTab(
 			contentColor = AppPalette.white,
 			shape = CircleShape,
 			modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(
-                    bottom = modifier.calculateBottomPadding() + 32.dp,
-                    end = 24.dp
-                )
+				.align(Alignment.BottomEnd)
+				.padding(
+					bottom = modifier.calculateBottomPadding() + 32.dp,
+					end = 24.dp
+				)
 		) {
 			Icon(Icons.Default.Add, contentDescription = "Add Device")
 		}
@@ -287,8 +308,8 @@ fun HomeTab(
 		SnackbarHost(
 			hostState = snackbarHostState,
 			modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = modifier.calculateBottomPadding() + 16.dp)
+				.align(Alignment.BottomCenter)
+				.padding(bottom = modifier.calculateBottomPadding() + 16.dp)
 		)
 		
 		LaunchedEffect(ledState) {
@@ -396,7 +417,7 @@ fun HomeTab(
 				}
 			)
 		}
-
+		
 		deviceForDetail?.let { device ->
 			DeviceDetailSheet(
 				deviceName = device.name,
@@ -407,12 +428,6 @@ fun HomeTab(
 }
 
 
-
-
-
-
-
-
 @Composable
 fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
 	val outerCornerRadius = 24.dp
@@ -421,33 +436,33 @@ fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
 	
 	Box(
 		modifier = Modifier
-            .fillMaxWidth()
-            .height(80.dp),
+			.fillMaxWidth()
+			.height(80.dp),
 		contentAlignment = Alignment.Center
 	) {
 		Box(
 			modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(outerCornerRadius))
-                .background(AppPalette.black.copy(alpha = 0.05f))
-                .border(
-                    1.dp,
-                    AppPalette.black.copy(alpha = 0.1f),
-                    RoundedCornerShape(outerCornerRadius),
-                )
+				.fillMaxSize()
+				.clip(RoundedCornerShape(outerCornerRadius))
+				.background(AppPalette.black.copy(alpha = 0.05f))
+				.border(
+					1.dp,
+					AppPalette.black.copy(alpha = 0.1f),
+					RoundedCornerShape(outerCornerRadius),
+				)
 		)
 		
 		Surface(
 			modifier = Modifier
-                .fillMaxSize()
-                .padding(gap)
-                .clip(RoundedCornerShape(innerCornerRadius)),
+				.fillMaxSize()
+				.padding(gap)
+				.clip(RoundedCornerShape(innerCornerRadius)),
 			color = AppPalette.white
 		) {
 			Row(
 				modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .fillMaxSize(),
+					.padding(horizontal = 16.dp, vertical = 12.dp)
+					.fillMaxSize(),
 				verticalAlignment = Alignment.CenterVertically,
 				horizontalArrangement = Arrangement.SpaceBetween
 			) {
@@ -486,12 +501,6 @@ fun SelectedDeviceCard(name: String, ipAddress: String, onChange: () -> Unit) {
 }
 
 
-
-
-
-
-
-
 @Composable
 fun FindDevicesCard(onFind: () -> Unit) {
 	val outerCornerRadius = 24.dp
@@ -500,33 +509,33 @@ fun FindDevicesCard(onFind: () -> Unit) {
 	
 	Box(
 		modifier = Modifier
-            .fillMaxWidth()
-            .height(100.dp),
+			.fillMaxWidth()
+			.height(100.dp),
 		contentAlignment = Alignment.Center
 	) {
 		Box(
 			modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(outerCornerRadius))
-                .background(AppPalette.black.copy(alpha = 0.05f))
-                .border(
-                    1.dp,
-                    AppPalette.black.copy(alpha = 0.1f),
-                    RoundedCornerShape(outerCornerRadius),
-                )
+				.fillMaxSize()
+				.clip(RoundedCornerShape(outerCornerRadius))
+				.background(AppPalette.black.copy(alpha = 0.05f))
+				.border(
+					1.dp,
+					AppPalette.black.copy(alpha = 0.1f),
+					RoundedCornerShape(outerCornerRadius),
+				)
 		)
 		
 		Surface(
 			modifier = Modifier
-                .fillMaxSize()
-                .padding(gap)
-                .clip(RoundedCornerShape(innerCornerRadius)),
+				.fillMaxSize()
+				.padding(gap)
+				.clip(RoundedCornerShape(innerCornerRadius)),
 			color = AppPalette.white
 		) {
 			Row(
 				modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .fillMaxSize(),
+					.padding(horizontal = 16.dp, vertical = 12.dp)
+					.fillMaxSize(),
 				verticalAlignment = Alignment.CenterVertically,
 				horizontalArrangement = Arrangement.SpaceBetween
 			) {
@@ -571,12 +580,6 @@ fun FindDevicesCard(onFind: () -> Unit) {
 }
 
 
-
-
-
-
-
-
 @Composable
 fun DiscoveryDialog(
 	state: UiState<List<DiscoveredDevice>>,
@@ -593,33 +596,33 @@ fun DiscoveryDialog(
 		
 		Box(
 			modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .wrapContentHeight(),
+				.fillMaxWidth(0.85f)
+				.wrapContentHeight(),
 			contentAlignment = Alignment.Center
 		) {
 			Box(
 				modifier = Modifier
-                    .matchParentSize()
-                    .clip(RoundedCornerShape(outerCornerRadius))
-                    .background(AppPalette.black.copy(alpha = 0.05f))
-                    .border(
-                        1.dp,
-                        AppPalette.black.copy(alpha = 0.1f),
-                        RoundedCornerShape(outerCornerRadius),
-                    )
+					.matchParentSize()
+					.clip(RoundedCornerShape(outerCornerRadius))
+					.background(AppPalette.black.copy(alpha = 0.05f))
+					.border(
+						1.dp,
+						AppPalette.black.copy(alpha = 0.1f),
+						RoundedCornerShape(outerCornerRadius),
+					)
 			)
 			
 			Surface(
 				modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(gap)
-                    .clip(RoundedCornerShape(innerCornerRadius)),
+					.fillMaxWidth()
+					.padding(gap)
+					.clip(RoundedCornerShape(innerCornerRadius)),
 				color = AppPalette.white
 			) {
 				Column(
 					modifier = Modifier
-                        .padding(20.dp)
-                        .fillMaxWidth(),
+						.padding(20.dp)
+						.fillMaxWidth(),
 					horizontalAlignment = Alignment.CenterHorizontally
 				) {
 					AppText.Bold(
@@ -632,8 +635,8 @@ fun DiscoveryDialog(
 					
 					Box(
 						modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(max = 300.dp),
+							.fillMaxWidth()
+							.heightIn(max = 300.dp),
 						contentAlignment = Alignment.Center
 					) {
 						when (state) {
@@ -660,11 +663,11 @@ fun DiscoveryDialog(
 									items(state.data) { device ->
 										Surface(
 											modifier = Modifier
-                                                .fillMaxWidth()
-                                                .clickable {
-                                                    onSelectDevice(device)
-                                                    onDismiss()
-                                                },
+												.fillMaxWidth()
+												.clickable {
+													onSelectDevice(device)
+													onDismiss()
+												},
 											shape = RoundedCornerShape(12.dp),
 											color = AppPalette.lightGray
 										) {
@@ -729,13 +732,6 @@ fun DiscoveryDialog(
 }
 
 
-
-
-
-
-
-
-
 @Composable
 fun DeviceItem(
 	device: DeviceStatus,
@@ -756,27 +752,27 @@ fun DeviceItem(
 	
 	Box(
 		modifier = Modifier
-            .fillMaxWidth()
-            .height(180.dp),
+			.fillMaxWidth()
+			.height(180.dp),
 		contentAlignment = Alignment.Center
 	) {
 		Box(
 			modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(outerCornerRadius))
-                .background(AppPalette.black.copy(alpha = 0.05f))
-                .border(
-                    1.dp,
-                    AppPalette.black.copy(alpha = 0.1f),
-                    RoundedCornerShape(outerCornerRadius),
-                )
+				.fillMaxSize()
+				.clip(RoundedCornerShape(outerCornerRadius))
+				.background(AppPalette.black.copy(alpha = 0.05f))
+				.border(
+					1.dp,
+					AppPalette.black.copy(alpha = 0.1f),
+					RoundedCornerShape(outerCornerRadius),
+				)
 		)
 		
 		Surface(
 			modifier = Modifier
-                .fillMaxSize()
-                .padding(gap)
-                .clip(RoundedCornerShape(innerCornerRadius))
+				.fillMaxSize()
+				.padding(gap)
+				.clip(RoundedCornerShape(innerCornerRadius))
 				.clickable(
 					interactionSource = remember { MutableInteractionSource() },
 					indication = null,
@@ -786,13 +782,15 @@ fun DeviceItem(
 		) {
 			Row(
 				modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxSize(),
+					.padding(16.dp)
+					.fillMaxSize(),
 				horizontalArrangement = Arrangement.SpaceBetween,
 				verticalAlignment = Alignment.Top
 			) {
 				Column(
-					modifier = Modifier.weight(1f).fillMaxHeight(),
+					modifier = Modifier
+						.weight(1f)
+						.fillMaxHeight(),
 					verticalArrangement = Arrangement.SpaceBetween
 				) {
 					Icon(
@@ -817,11 +815,11 @@ fun DeviceItem(
 						) {
 							Box(
 								modifier = Modifier
-                                    .size(6.dp)
-                                    .background(
-                                        color = if (device.isConnected) AppPalette.green else AppPalette.red,
-                                        shape = RoundedCornerShape(50)
-                                    )
+									.size(6.dp)
+									.background(
+										color = if (device.isConnected) AppPalette.green else AppPalette.red,
+										shape = RoundedCornerShape(50)
+									)
 							)
 							Spacer(modifier = Modifier.width(6.dp))
 							AppText.Medium(
@@ -838,42 +836,36 @@ fun DeviceItem(
 					onStatusChange = onCheckedChange,
 					enabled = device.isConnected,
 				)
-                
-                /*Column(
-                    modifier = Modifier.fillMaxHeight(),
-                    horizontalAlignment = Alignment.End,
-                    verticalArrangement = Arrangement.SpaceBetween
-                ) {
-	                VerticalOnOffToggle(
-		                isOn = device.isOn,
-		                onStatusChange = onCheckedChange,
-		                enabled = device.isConnected
-	                )
+				
+				/*Column(
+					modifier = Modifier.fillMaxHeight(),
+					horizontalAlignment = Alignment.End,
+					verticalArrangement = Arrangement.SpaceBetween
+				) {
+					VerticalOnOffToggle(
+						isOn = device.isOn,
+						onStatusChange = onCheckedChange,
+						enabled = device.isConnected
+					)
 					
-                    IconButton(
-                        onClick = onDelete,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_remove),
-                            contentDescription = "Delete",
-                            tint = AppPalette.red.copy(alpha = 0.6f),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                    
-                    
-                }*/
+					IconButton(
+						onClick = onDelete,
+						modifier = Modifier.size(32.dp)
+					) {
+						Icon(
+							painter = painterResource(id = R.drawable.ic_remove),
+							contentDescription = "Delete",
+							tint = AppPalette.red.copy(alpha = 0.6f),
+							modifier = Modifier.size(20.dp)
+						)
+					}
+					
+					
+				}*/
 			}
 		}
 	}
 }
-
-
-
-
-
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -899,23 +891,23 @@ fun AddDeviceDialog(
 		
 		Box(
 			modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .wrapContentHeight(),
+				.fillMaxWidth(0.9f)
+				.wrapContentHeight(),
 			contentAlignment = Alignment.Center
 		) {
 			Box(
 				modifier = Modifier
-                    .matchParentSize()
-                    .clip(RoundedCornerShape(outerCornerRadius))
-                    .background(AppPalette.black.copy(alpha = 0.05f))
-                    .border(1.dp, AppPalette.black.copy(alpha = 0.1f), RoundedCornerShape(outerCornerRadius))
+					.matchParentSize()
+					.clip(RoundedCornerShape(outerCornerRadius))
+					.background(AppPalette.black.copy(alpha = 0.05f))
+					.border(1.dp, AppPalette.black.copy(alpha = 0.1f), RoundedCornerShape(outerCornerRadius))
 			)
 			
 			Surface(
 				modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(gap)
-                    .clip(RoundedCornerShape(innerCornerRadius)),
+					.fillMaxWidth()
+					.padding(gap)
+					.clip(RoundedCornerShape(innerCornerRadius)),
 				color = AppPalette.white
 			) {
 				Column(
@@ -997,12 +989,6 @@ fun AddDeviceDialog(
 }
 
 
-
-
-
-
-
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PinDropdown(
@@ -1025,8 +1011,8 @@ fun PinDropdown(
 			label = { AppText.Normal(text = label) },
 			trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
 			modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth(),
+				.menuAnchor()
+				.fillMaxWidth(),
 			shape = RoundedCornerShape(12.dp),
 			colors = OutlinedTextFieldDefaults.colors(
 				focusedBorderColor = AppPalette.primary,
@@ -1052,12 +1038,6 @@ fun PinDropdown(
 }
 
 
-
-
-
-
-
-
 @Composable
 fun WifiConfigDialog(
 	state: UiState<ResponseBody>,
@@ -1076,23 +1056,23 @@ fun WifiConfigDialog(
 		
 		Box(
 			modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .wrapContentHeight(),
+				.fillMaxWidth(0.9f)
+				.wrapContentHeight(),
 			contentAlignment = Alignment.Center
 		) {
 			Box(
 				modifier = Modifier
-                    .matchParentSize()
-                    .clip(RoundedCornerShape(outerCornerRadius))
-                    .background(AppPalette.black.copy(alpha = 0.05f))
-                    .border(1.dp, AppPalette.black.copy(alpha = 0.1f), RoundedCornerShape(outerCornerRadius))
+					.matchParentSize()
+					.clip(RoundedCornerShape(outerCornerRadius))
+					.background(AppPalette.black.copy(alpha = 0.05f))
+					.border(1.dp, AppPalette.black.copy(alpha = 0.1f), RoundedCornerShape(outerCornerRadius))
 			)
 			
 			Surface(
 				modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(gap)
-                    .clip(RoundedCornerShape(innerCornerRadius)),
+					.fillMaxWidth()
+					.padding(gap)
+					.clip(RoundedCornerShape(innerCornerRadius)),
 				color = AppPalette.white
 			) {
 				Column(
@@ -1158,12 +1138,6 @@ fun WifiConfigDialog(
 }
 
 
-
-
-
-
-
-
 @Composable
 fun DeleteConfirmationDialog(
 	deviceName: String,
@@ -1180,23 +1154,23 @@ fun DeleteConfirmationDialog(
 		
 		Box(
 			modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .wrapContentHeight(),
+				.fillMaxWidth(0.85f)
+				.wrapContentHeight(),
 			contentAlignment = Alignment.Center
 		) {
 			Box(
 				modifier = Modifier
-                    .matchParentSize()
-                    .clip(RoundedCornerShape(outerCornerRadius))
-                    .background(AppPalette.black.copy(alpha = 0.05f))
-                    .border(1.dp, AppPalette.black.copy(alpha = 0.1f), RoundedCornerShape(outerCornerRadius))
+					.matchParentSize()
+					.clip(RoundedCornerShape(outerCornerRadius))
+					.background(AppPalette.black.copy(alpha = 0.05f))
+					.border(1.dp, AppPalette.black.copy(alpha = 0.1f), RoundedCornerShape(outerCornerRadius))
 			)
 			
 			Surface(
 				modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(gap)
-                    .clip(RoundedCornerShape(innerCornerRadius)),
+					.fillMaxWidth()
+					.padding(gap)
+					.clip(RoundedCornerShape(innerCornerRadius)),
 				color = AppPalette.white
 			) {
 				Column(
@@ -1258,26 +1232,26 @@ fun DeleteConfirmationDialog(
 @Preview(showBackground = true)
 @Composable
 private fun DeviceItemPreview() {
-    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        DeviceItem(
-            device = DeviceStatus(name = "Living Room Light", isOn = true, isConnected = true, ipAddress = "1.1.1.1"),
-            onCheckedChange = {},
-            onDelete = {},
-            onClick = {}
-        )
-        DeviceItem(
-            device = DeviceStatus(name = "Bedroom Light", isOn = false, isConnected = true, ipAddress = "1.1.1.2"),
-            onCheckedChange = {},
-            onDelete = {},
-            onClick = {}
-        )
-        DeviceItem(
-            device = DeviceStatus(name = "Kitchen Light", isOn = false, isConnected = false, ipAddress = "1.1.1.3"),
-            onCheckedChange = {},
-            onDelete = {},
-            onClick = {}
-        )
-    }
+	Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+		DeviceItem(
+			device = DeviceStatus(name = "Living Room Light", isOn = true, isConnected = true, ipAddress = "1.1.1.1"),
+			onCheckedChange = {},
+			onDelete = {},
+			onClick = {}
+		)
+		DeviceItem(
+			device = DeviceStatus(name = "Bedroom Light", isOn = false, isConnected = true, ipAddress = "1.1.1.2"),
+			onCheckedChange = {},
+			onDelete = {},
+			onClick = {}
+		)
+		DeviceItem(
+			device = DeviceStatus(name = "Kitchen Light", isOn = false, isConnected = false, ipAddress = "1.1.1.3"),
+			onCheckedChange = {},
+			onDelete = {},
+			onClick = {}
+		)
+	}
 }
 
 
