@@ -3,6 +3,7 @@ package com.app.iot.ui.features.home.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.iot.domain.usecase.HomeUseCase
+import com.app.iot.util.AppPreferences
 import com.app.iot.util.UiState
 import com.app.iot.util.WifiConnectivityManager
 import com.google.gson.Gson
@@ -46,7 +47,8 @@ private data class DiscoveryResponse(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val homeUseCase: HomeUseCase,
-    private val wifiConnectivityManager: WifiConnectivityManager
+    private val wifiConnectivityManager: WifiConnectivityManager,
+    private val appPreferences: AppPreferences
 ) : ViewModel() {
 
     private val _ledState = MutableStateFlow<UiState<ResponseBody>>(UiState.Idle)
@@ -72,6 +74,25 @@ class HomeViewModel @Inject constructor(
 
     private val _devices = MutableStateFlow<List<DeviceStatus>>(emptyList())
     val devices: StateFlow<List<DeviceStatus>> = _devices.asStateFlow()
+
+    private val _selectedDevice = MutableStateFlow<DiscoveredDevice?>(null)
+    val selectedDevice: StateFlow<DiscoveredDevice?> = _selectedDevice.asStateFlow()
+
+    init {
+        // Load persisted device
+        val savedIp = appPreferences.selectedIp
+        val savedName = appPreferences.selectedName
+        if (savedIp.isNotEmpty()) {
+            _selectedDevice.value = DiscoveredDevice(savedName, savedIp)
+        }
+    }
+
+    fun selectDevice(device: DiscoveredDevice) {
+        _selectedDevice.value = device
+        appPreferences.selectedIp = device.ip
+        appPreferences.selectedName = device.name
+        fetchStatus()
+    }
 
     private val UDP_PORT = 4210
     private val DISCOVERY_MESSAGE = "DISCOVER_ESP"

@@ -29,9 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.app.iot.BuildConfig
 import com.app.iot.R
-import com.app.iot.data.ApiPath
 import com.app.iot.ui.components.core.AppImage
 import com.app.iot.ui.components.core.AppText
+import com.app.iot.ui.features.home.viewmodel.DiscoveredDevice
 import com.app.iot.ui.features.home.viewmodel.HomeViewModel
 import com.app.iot.ui.theme.AppPalette
 import com.app.iot.ui.theme.AppPreview
@@ -47,6 +47,7 @@ fun LauncherScreen(
 ) {
 	val context = LocalContext.current
 	val scanState by viewModel.scanState.collectAsState()
+	val selectedDevice by viewModel.selectedDevice.collectAsState()
 	var statusText by remember { mutableStateOf("Initializing...") }
 	var isWifiReady by remember { mutableStateOf(false) }
 	
@@ -74,13 +75,23 @@ fun LauncherScreen(
 			connectivityManager.unregisterNetworkCallback(networkCallback)
 		}
 	}
+
+	// Priority 1: If we already have a saved device, skip scanning
+	LaunchedEffect(selectedDevice) {
+		if (selectedDevice != null) {
+			statusText = "Reconnecting to ${selectedDevice!!.name}..."
+			delay(1.seconds)
+			onNavigateToMain()
+		}
+	}
 	
-	LaunchedEffect(isWifiReady) {
-		if (isWifiReady) {
+	// Priority 2: If no saved device, scan when WiFi is ready
+	LaunchedEffect(isWifiReady, selectedDevice) {
+		if (isWifiReady && selectedDevice == null) {
 			statusText = "Scanning for devices..."
 			val ip = viewModel.getWifiIpAddress()
 			viewModel.findEspDevices(ip)
-		} else {
+		} else if (!isWifiReady && selectedDevice == null) {
 			delay(3.seconds)
 			if (!isWifiReady) {
 				statusText = "WiFi not connected"
@@ -96,8 +107,7 @@ fun LauncherScreen(
 				val firstDevice = state.data.firstOrNull()
 				if (firstDevice != null) {
 					statusText = "Device found: ${firstDevice.name}"
-					ApiPath.LOCAL_WIFI_IP_URL = firstDevice.ip
-					ApiPath.SELECTED_DEVICE_NAME = firstDevice.name
+					viewModel.selectDevice(firstDevice)
 					delay(1.seconds)
 					onNavigateToMain()
 				} else {

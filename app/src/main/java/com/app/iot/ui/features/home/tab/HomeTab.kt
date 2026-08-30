@@ -120,8 +120,8 @@ fun HomeTab(
 	var isAppWifiConnected by remember { mutableStateOf(false) }
 	var systemIpAddress by remember { mutableStateOf("0.0.0.0") }
 	var wifiSsid by remember { mutableStateOf("") }
-	var selectedDeviceIp by remember { mutableStateOf(ApiPath.LOCAL_WIFI_IP_URL) }
-	var selectedDeviceName by remember { mutableStateOf(ApiPath.SELECTED_DEVICE_NAME) }
+	
+	val selectedDevice by homeViewModel.selectedDevice.collectAsState()
 	
 	var showAddDeviceDialog by remember { mutableStateOf(false) }
 	var showWifiDialog by remember { mutableStateOf(false) }
@@ -137,16 +137,21 @@ fun HomeTab(
 	val updateWifiState by homeViewModel.updateWifiState.collectAsState()
 	val removeDeviceState by homeViewModel.removeDeviceState.collectAsState()
 	
-	val banners = remember {
+	val banners = remember(selectedDevice, devices) {
+		val hubName = selectedDevice?.name ?: "Smart Home"
+		val deviceCount = devices.size
+		val activeCount = devices.count { it.isOn && it.isConnected }
+		
 		listOf(
 			BannerData(
-				"Smart Home",
-				"Optimize your energy consumption with AI.",
-				listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF))
+				hubName,
+				if (deviceCount > 0) "$deviceCount Devices - $activeCount Active" 
+				else "Optimize your energy consumption with AI.",
+				listOf(Color(0xFF1976D2), Color(0xFF64B5F6))
 			),
 			BannerData(
-				"Test",
-				"Physical therapy for body function improvement.",
+				"Quick Tips",
+				"Keep your firmware updated for better security.",
 				listOf(Color(0xFF8E24AA), Color(0xFF64B5F6))
 			),
 		)
@@ -425,11 +430,7 @@ fun HomeTab(
 							showAddDeviceDialog = true
 						},
 						onDeviceSelected = { name, ip ->
-							selectedDeviceName = name
-							selectedDeviceIp = ip
-							ApiPath.SELECTED_DEVICE_NAME = name
-							ApiPath.LOCAL_WIFI_IP_URL = ip
-							homeViewModel.fetchStatus()
+							homeViewModel.selectDevice(DiscoveredDevice(name, ip))
 							showSearchFlow = false
 						}
 					)
