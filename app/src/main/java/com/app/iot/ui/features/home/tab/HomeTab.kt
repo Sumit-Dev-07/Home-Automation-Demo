@@ -185,7 +185,7 @@ fun HomeTab(
 					Intent(Settings.ACTION_WIFI_SETTINGS)
 				)
 			})
-			WifiStatusHeader(
+			/*WifiStatusHeader(
 				isConnected = isAppWifiConnected,
 				ssid = wifiSsid,
 				ipAddress = systemIpAddress,
@@ -212,7 +212,7 @@ fun HomeTab(
 			} else if (isAppWifiConnected) {
 				FindDevicesCard(onFind = { showSearchFlow = true })
 				Spacer(modifier = Modifier.height(16.dp))
-			}
+			}*/
 			
 			LazyVerticalGrid(
 				columns = GridCells.Fixed(2),
