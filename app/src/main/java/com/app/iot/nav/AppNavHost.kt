@@ -69,7 +69,6 @@ fun AppNavHost() {
         composable<Search> { backStackEntry ->
             val search: Search = backStackEntry.toRoute()
             SearchDeviceScreen(
-                showBackButton = search.showBackButton,
                 onClose = {
                     navController.navigate(Home) {
                         popUpTo<Search> {

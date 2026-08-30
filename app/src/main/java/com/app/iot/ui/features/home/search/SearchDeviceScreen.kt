@@ -1,6 +1,11 @@
 package com.app.iot.ui.features.home.search
 
 import android.app.Activity
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -21,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -94,6 +100,32 @@ fun SearchDeviceScreen(
 	val discoveryState by homeViewModel.discoveryState.collectAsState()
 	val scanState by homeViewModel.scanState.collectAsState()
 
+	// Ensure local communication works by binding to Wi-Fi network
+	DisposableEffect(context) {
+		val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+		val networkRequest = NetworkRequest.Builder()
+			.addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+			.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+			.build()
+
+		val networkCallback = object : ConnectivityManager.NetworkCallback() {
+			override fun onAvailable(network: Network) {
+				connectivityManager.bindProcessToNetwork(network)
+			}
+
+			override fun onLost(network: Network) {
+				connectivityManager.bindProcessToNetwork(null)
+			}
+		}
+
+		connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
+
+		onDispose {
+			connectivityManager.unregisterNetworkCallback(networkCallback)
+			connectivityManager.bindProcessToNetwork(null)
+		}
+	}
+
 	fun startScan() {
 		permissionMessage = null
 		showOpenSettings = false
@@ -124,6 +156,13 @@ fun SearchDeviceScreen(
 			startScan()
 		} else {
 			permissionLauncher.launch(nearbyDevicePermissions())
+		}
+	}
+
+	// Auto-start scan if permissions are already granted
+	LaunchedEffect(Unit) {
+		if (context.hasNearbyDevicePermissions()) {
+			startScan()
 		}
 	}
 
@@ -165,6 +204,7 @@ fun SearchDeviceScreen(
 				it.connectionStatus == ConnectionStatus.CONNECTED
 			} ?: discoveryState.firstOrNull()
 			if (selected != null) {
+				homeViewModel.selectDevice(selected.device)
 				onDeviceSelected(selected.device.name, selected.device.ip)
 			}
 			onClose()
