@@ -33,6 +33,8 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -87,6 +89,7 @@ import com.app.iot.ui.components.core.AppText
 import com.app.iot.ui.features.home.search.SearchDeviceScreen
 import com.app.iot.ui.features.home.tab.components.BannerData
 import com.app.iot.ui.features.home.tab.components.DeviceDetailSheet
+import com.app.iot.ui.features.home.tab.components.DevicePagerIndicator
 import com.app.iot.ui.features.home.tab.components.HomeBannerList
 import com.app.iot.ui.features.home.tab.components.HomeHeader
 import com.app.iot.ui.features.home.tab.components.VerticalOnOffToggle
@@ -235,7 +238,89 @@ fun HomeTab(
 				Spacer(modifier = Modifier.height(16.dp))
 			}*/
 			
-			LazyVerticalGrid(
+			val chunkedDevices = remember(devices) { devices.chunked(4) }
+			val devicePagerState = rememberPagerState(pageCount = { chunkedDevices.size })
+
+			Row(
+				modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+				horizontalArrangement = Arrangement.SpaceBetween,
+				verticalAlignment = Alignment.CenterVertically
+			) {
+				AppText.Bold(
+					text = "Devices",
+					fontSize = 20.sp,
+					color = AppPalette.white
+				)
+				
+				DevicePagerIndicator(
+					pagerState = devicePagerState,
+					pageCount = chunkedDevices.size
+				)
+			}
+			
+			Spacer(modifier = Modifier.height(16.dp))
+			
+			if (devices.isEmpty()) {
+				Column(
+					modifier = Modifier
+						.fillMaxWidth()
+						.padding(vertical = 48.dp),
+					horizontalAlignment = Alignment.CenterHorizontally,
+					verticalArrangement = Arrangement.Center
+				) {
+					Icon(
+						imageVector = Icons.Default.DeveloperBoard,
+						contentDescription = null,
+						modifier = Modifier.size(80.dp),
+						tint = AppPalette.white
+					)
+					Spacer(modifier = Modifier.height(16.dp))
+					Text(
+						text = "No devices found",
+						style = MaterialTheme.typography.titleMedium,
+						color = AppPalette.white
+					)
+					Text(
+						text = "Tap to add a device",
+						style = MaterialTheme.typography.bodyMedium,
+						color = AppPalette.white
+					)
+				}
+			} else {
+				HorizontalPager(
+					state = devicePagerState,
+					modifier = Modifier.fillMaxWidth(),
+					verticalAlignment = Alignment.Top,
+					pageSpacing = 16.dp
+				) { page ->
+					LazyVerticalGrid(
+						columns = GridCells.Fixed(2),
+						horizontalArrangement = Arrangement.spacedBy(12.dp),
+						verticalArrangement = Arrangement.spacedBy(12.dp),
+						modifier = Modifier.fillMaxWidth().height(400.dp),
+						userScrollEnabled = false
+					) {
+						items(chunkedDevices[page]) { device ->
+							DeviceItem(
+								device = device,
+								onCheckedChange = { isChecked ->
+									if (isAppWifiConnected) {
+										homeViewModel.controlLed(device.id, isChecked)
+									}
+								},
+								onDelete = {
+									deviceToDelete = device
+								},
+								onClick = {
+									deviceForDetail = device
+								}
+							)
+						}
+					}
+				}
+			}
+			
+			/*LazyVerticalGrid(
 				columns = GridCells.Fixed(2),
 				horizontalArrangement = Arrangement.spacedBy(16.dp),
 				verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -287,7 +372,7 @@ fun HomeTab(
 						)
 					}
 				}
-			}
+			}*/
 		}
 		
 		FloatingActionButton(
@@ -739,9 +824,9 @@ fun DeviceItem(
 	onDelete: () -> Unit,
 	onClick: () -> Unit
 ) {
-	val outerCornerRadius = 28.dp
-	val innerCornerRadius = 24.dp
-	val gap = 6.dp
+	val outerCornerRadius = 24.dp
+	val innerCornerRadius = 20.dp
+	val gap = 4.dp
 	
 	val icon = when (device.iconType) {
 		"ac" -> Icons.Default.Air
