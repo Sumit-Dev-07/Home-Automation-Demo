@@ -1,6 +1,7 @@
 package com.app.iot.ui.features.home.tab.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.app.iot.R
 import com.app.iot.ui.components.core.AppText
+import com.app.iot.ui.theme.AppPalette
 import com.app.iot.ui.theme.AppPreview
 
 data class BannerData(
@@ -43,48 +45,77 @@ fun HomeBannerList(banners: List<BannerData>) {
 
 @Composable
 fun HomeBannerItem(banner: BannerData) {
+    val outerCorner = 20.dp
+    val innerCorner = 18.dp
+    val gap = 4.dp
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(150.dp)
-            .padding(horizontal = 8.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                Brush.linearGradient(
-                    colors = banner.colors
-                )
-            )
+            .padding(horizontal = 8.dp),
+        contentAlignment = Alignment.Center
     ) {
-        // Background Decorative Icon
-        Icon(
-            painter = painterResource(id = R.drawable.ic_devices),
-            contentDescription = null,
-            tint = Color.White.copy(alpha = 0.2f),
-            modifier = Modifier
-                .size(140.dp)
-                .align(Alignment.BottomEnd)
-                .offset(x = 30.dp, y = 30.dp)
-        )
-
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(20.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+                .clip(RoundedCornerShape(outerCorner))
+                .background(AppPalette.black.copy(alpha = 0.05f))
+                .border(
+                    1.dp,
+                    AppPalette.black.copy(alpha = 0.1f),
+                    RoundedCornerShape(outerCorner),
+                )
+        )
+
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(gap),
+            shape = RoundedCornerShape(innerCorner),
+            color = Color.Transparent
         ) {
-            Column {
-                AppText.Bold(
-                    text = banner.title,
-                    fontSize = 20.sp,
-                    color = Color.White
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.linearGradient(
+                            colors = banner.colors
+                        )
+                    )
+            ) {
+                // Background Decorative Icon
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_devices),
+                    contentDescription = null,
+                    tint = AppPalette.primary.copy(alpha = 0.2f),
+                    modifier = Modifier
+                        .size(140.dp)
+                        .align(Alignment.BottomEnd)
+                        .offset(x = 30.dp, y = 30.dp)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                AppText.Normal(
-                    text = "2 Rooms - 4 Devices",
-                    fontSize = 13.sp,
-                    color = Color.White.copy(alpha = 0.8f),
-                    maxLines = 2
-                )
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        AppText.Bold(
+                            text = banner.title,
+                            fontSize = 20.sp,
+                            color = Color.Black
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        AppText.Normal(
+                            text = "2 Rooms - 4 Devices",
+                            fontSize = 13.sp,
+                            color = Color.Black.copy(alpha = 0.8f),
+                            maxLines = 2
+                        )
+                    }
+                }
             }
         }
     }
@@ -97,7 +128,7 @@ fun HomeBannerPreview() {
         BannerData(
             "Home",
             "Optimize your energy consumption with AI.",
-            listOf(Color(0xFF1976D2), Color(0xFF64B5F6))
+            listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF))
         ),
         BannerData(
             "Test",

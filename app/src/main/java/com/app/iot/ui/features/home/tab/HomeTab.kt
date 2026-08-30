@@ -142,7 +142,7 @@ fun HomeTab(
 			BannerData(
 				"Smart Home",
 				"Optimize your energy consumption with AI.",
-				listOf(Color(0xFF1976D2), Color(0xFF64B5F6))
+				listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF))
 			),
 			BannerData(
 				"Test",
