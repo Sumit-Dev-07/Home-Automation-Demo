@@ -67,6 +67,7 @@ enum class SearchFlowStep {
 
 @Composable
 fun SearchDeviceScreen(
+	showBackButton: Boolean = true,
 	onClose: () -> Unit,
 	onAddManually: () -> Unit = {},
 	onDeviceSelected: (name: String, ip: String) -> Unit = { _, _ -> },
@@ -79,6 +80,7 @@ fun SearchDeviceScreen(
 			permissionMessage = null,
 			showOpenSettings = false,
 			hasNearbyPermissions = false,
+			showBackButton = showBackButton,
 			onClose = onClose,
 			onAllowAndContinue = {},
 			onAddManually = onAddManually,
@@ -176,7 +178,7 @@ fun SearchDeviceScreen(
 		}
 	}
 
-	BackHandler {
+	BackHandler(enabled = currentStep != SearchFlowStep.INITIAL || showBackButton) {
 		if (currentStep == SearchFlowStep.INITIAL) {
 			onClose()
 		} else {
@@ -191,6 +193,7 @@ fun SearchDeviceScreen(
 		permissionMessage = permissionMessage,
 		showOpenSettings = showOpenSettings,
 		hasNearbyPermissions = context.hasNearbyDevicePermissions(),
+		showBackButton = showBackButton,
 		onClose = onClose,
 		onAllowAndContinue = { requestPermissionsOrScan() },
 		onAddManually = onAddManually,
@@ -221,6 +224,7 @@ private fun SearchDeviceContent(
 	permissionMessage: String?,
 	showOpenSettings: Boolean,
 	hasNearbyPermissions: Boolean,
+	showBackButton: Boolean,
 	onClose: () -> Unit,
 	onAllowAndContinue: () -> Unit,
 	onAddManually: () -> Unit,
@@ -245,8 +249,8 @@ private fun SearchDeviceContent(
 	Scaffold(
 		topBar = {
 			CommonTopAppBar(
-				title = "Search Devices",
-				onBackClick = onClose
+				title = if (showBackButton) "Search Devices" else "Setup",
+				onBackClick = if (showBackButton) onClose else null
 			)
 		},
 		containerColor = AppPalette.white
@@ -396,6 +400,7 @@ fun SearchDeviceResultsPreview() {
 			permissionMessage = null,
 			showOpenSettings = false,
 			hasNearbyPermissions = true,
+			showBackButton = true,
 			onClose = {},
 			onAllowAndContinue = {},
 			onAddManually = {},
