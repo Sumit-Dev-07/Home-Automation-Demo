@@ -8,6 +8,7 @@ object AppPalette {
     
     val black = Color(0xFF212121)
     val white = Color(0xFFFFFFFF)
+    val transparent = Color.Transparent
     val background = Color(0xF1F1F1F1)
     val gray = Color(0xFF9E9E9E)
     val lightGray = Color(0xFFF5F5F5)

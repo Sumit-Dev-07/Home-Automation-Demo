@@ -1,5 +1,8 @@
 package com.app.iot.ui.features.home.tab.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,9 +27,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.app.iot.R
+import com.app.iot.ui.components.core.AppText
 import com.app.iot.ui.theme.AppFont
 import com.app.iot.ui.theme.AppPalette
 import com.app.iot.ui.theme.AppPreview
@@ -34,11 +41,8 @@ import com.app.iot.ui.theme.AppPreview
 @Composable
 fun HomeHeader(
 	isConnected: Boolean,
-	ssid: String,
-	ipAddress: String,
-	isRefreshing: Boolean,
-	onRefresh: () -> Unit,
-	onSettingsClick: () -> Unit
+	onDeviceClick: () -> Unit,
+	onWifiClick: () -> Unit
 ) {
 	val innerCornerRadius = 20.dp
 	
@@ -47,110 +51,78 @@ fun HomeHeader(
 		contentAlignment = Alignment.Center
 	) {
 		
-		Row() {
-			Surface(
-				modifier = Modifier
-					.clip(RoundedCornerShape(innerCornerRadius)),
-				color = AppPalette.white
-			) {
-				Row(
-					modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-					verticalAlignment = Alignment.CenterVertically
-				) {
-				
-				}
-			}
-		}
-		
-		
-		
-		/*Surface(
+		Surface(
 			modifier = Modifier
-				.fillMaxWidth()
 				.clip(RoundedCornerShape(innerCornerRadius)),
-			color = AppPalette.white
+			color = AppPalette.transparent
 		) {
+			
 			Row(
-				modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-				verticalAlignment = Alignment.CenterVertically
+				modifier = Modifier.fillMaxWidth().padding(16.dp),
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.SpaceBetween
 			) {
-				if (isRefreshing) {
-					CircularProgressIndicator(
-						modifier = Modifier.size(24.dp),
-						strokeWidth = 2.dp,
-						color = AppPalette.green
-					)
-				} else {
-					Icon(
-						imageVector = if (isConnected) Icons.Default.Wifi else Icons.Default.WifiOff,
-						contentDescription = null,
-						tint = if (isConnected) AppPalette.green else AppPalette.red,
-						modifier = Modifier.size(24.dp)
-					)
-				}
-				Spacer(modifier = Modifier.width(12.dp))
-				Column {
-					Text(
-						text = if (isConnected) ssid.ifEmpty { "System Online" } else "System Offline",
-						fontFamily = AppFont.onestMedium,
-						fontSize = 14.sp,
-						color = if (isConnected) AppPalette.darkGreen else AppPalette.darkRed
-					)
-					if (isConnected) {
-						Row(verticalAlignment = Alignment.CenterVertically) {
-							Text(
-								text = "IP: $ipAddress",
-								fontFamily = AppFont.onestRegular,
-								fontSize = 11.sp,
-								color = AppPalette.gray
+				AppText.Medium(
+					"Good Morning",
+					color = AppPalette.black
+				)
+				
+				Row(
+					verticalAlignment = Alignment.CenterVertically,
+					horizontalArrangement = Arrangement.SpaceBetween
+				) {
+					
+					Surface(
+						modifier = Modifier.size(42.dp),
+						shape = RoundedCornerShape(12.dp),
+						color = AppPalette.gray.copy(alpha = 0.1f),
+						onClick = onDeviceClick
+					) {
+						Box(
+							contentAlignment = Alignment.Center
+						) {
+							Icon(
+								painter = painterResource(id = R.drawable.ic_product),
+								contentDescription = null,
+								tint = AppPalette.black,
+								modifier = Modifier.size(24.dp)
 							)
 						}
 					}
-				}
-				Spacer(modifier = Modifier.weight(1f))
-				if (isConnected) {
-					IconButton(onClick = onSettingsClick) {
-						Icon(
-							Icons.Default.Settings,
-							contentDescription = "WiFi Settings",
-							tint = AppPalette.gray,
-							modifier = Modifier.size(20.dp)
-						)
-					}
-				}
-				if (!isConnected) {
-					TextButton(
-						onClick = onRefresh,
-						contentPadding = PaddingValues(horizontal = 8.dp)
+					Spacer(modifier = Modifier.width(width = 16.dp))
+					Surface(
+						modifier = Modifier.size(42.dp),
+						shape = RoundedCornerShape(12.dp),
+						color = AppPalette.white,
+						onClick = onWifiClick
 					) {
-						Text(
-							text = "Connect",
-							fontFamily = AppFont.onestSemiBold,
-							fontSize = 12.sp,
-							color = AppPalette.darkRed
-						)
+						Box(
+							contentAlignment = Alignment.Center
+						) {
+							Icon(
+								painter = if(isConnected) painterResource(id = R.drawable.ic_wifi) else painterResource(id = R.drawable.ic_wifi_off),
+								contentDescription = null,
+								tint = AppPalette.black,
+								modifier = Modifier.size(20.dp)
+							)
+						}
 					}
+					
 				}
 			}
-		}*/
+		}
 	}
 }
 
 @Composable
 private fun HomeHeaderPreviewItem(
 	isConnected: Boolean = true,
-	ssid: String = "Home_WiFi",
-	ipAddress: String = "192.168.1.5",
-	isRefreshing: Boolean = false
 ) {
-	AppPreview {
+	AppPreview(color = AppPalette.transparent) {
 		HomeHeader(
 			isConnected = isConnected,
-			ssid = ssid,
-			ipAddress = ipAddress,
-			isRefreshing = isRefreshing,
-			onRefresh = {},
-			onSettingsClick = {}
+			onDeviceClick = {},
+			onWifiClick = {}
 		)
 	}
 }
@@ -164,17 +136,5 @@ fun HomeHeaderConnectedPreview() {
 @Preview(showBackground = true)
 @Composable
 fun HomeHeaderDisconnectedPreview() {
-	HomeHeaderPreviewItem(
-		isConnected = false,
-		ssid = "",
-		ipAddress = ""
-	)
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomeHeaderRefreshingPreview() {
-	HomeHeaderPreviewItem(
-		isRefreshing = true
-	)
+	HomeHeaderPreviewItem(false)
 }

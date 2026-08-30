@@ -1,14 +1,17 @@
 package com.app.iot.ui.features.home.tab
 
 import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -84,6 +87,7 @@ import com.app.iot.R
 import com.app.iot.data.ApiPath
 import com.app.iot.ui.features.home.search.SearchDeviceScreen
 import com.app.iot.ui.features.home.tab.components.DeviceDetailSheet
+import com.app.iot.ui.features.home.tab.components.HomeHeader
 import com.app.iot.ui.features.home.tab.components.HorizontalOnOffToggle
 import com.app.iot.ui.features.home.tab.components.VerticalOnOffToggle
 import com.app.iot.ui.features.home.tab.components.WifiStatusHeader
@@ -174,6 +178,13 @@ fun HomeTab(
                 .padding(top = modifier.calculateTopPadding())
                 .padding(16.dp)
 		) {
+			HomeHeader(isConnected = isAppWifiConnected, onDeviceClick = {
+				showSearchFlow = true
+			}, onWifiClick = {
+				context.startActivity(
+					Intent(Settings.ACTION_WIFI_SETTINGS)
+				)
+			})
 			WifiStatusHeader(
 				isConnected = isAppWifiConnected,
 				ssid = wifiSsid,
@@ -250,7 +261,7 @@ fun HomeTab(
 								deviceToDelete = device
 							},
 							onClick = {
-								//deviceForDetail = device
+								deviceForDetail = device
 							}
 						)
 					}
@@ -766,7 +777,11 @@ fun DeviceItem(
                 .fillMaxSize()
                 .padding(gap)
                 .clip(RoundedCornerShape(innerCornerRadius))
-				.clickable(onClick = onClick),
+				.clickable(
+					interactionSource = remember { MutableInteractionSource() },
+					indication = null,
+					onClick = onClick
+				),
 			color = AppPalette.white
 		) {
 			Row(
