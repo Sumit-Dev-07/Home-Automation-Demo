@@ -9,3 +9,6 @@ data object Home
 
 @Serializable
 data object Login
+
+@Serializable
+data class Search(val showBackButton: Boolean = true)

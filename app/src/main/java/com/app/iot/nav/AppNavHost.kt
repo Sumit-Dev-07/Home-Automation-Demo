@@ -1,5 +1,6 @@
 package com.app.iot.nav
 
+import androidx.navigation.toRoute
 import com.app.iot.ui.features.common.screen.LauncherScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
@@ -7,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.app.iot.ui.features.auth.screen.LoginScreen
 import com.app.iot.ui.features.home.screen.HomeScreen
+import com.app.iot.ui.features.home.search.SearchDeviceScreen
 
 @Composable
 fun AppNavHost() {
@@ -22,6 +24,13 @@ fun AppNavHost() {
             LauncherScreen(
                 onNavigateToMain = {
                     navController.navigate(Home) {
+                        popUpTo<Launcher> {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToSearch = {
+                    navController.navigate(Search(showBackButton = false)) {
                         popUpTo<Launcher> {
                             inclusive = true
                         }
@@ -54,6 +63,28 @@ fun AppNavHost() {
             popExitTransition = NavAnimations.popExit()*/
         ) {
             HomeScreen()
+        }
+
+        // Search
+        composable<Search> { backStackEntry ->
+            val search: Search = backStackEntry.toRoute()
+            SearchDeviceScreen(
+                showBackButton = search.showBackButton,
+                onClose = {
+                    navController.navigate(Home) {
+                        popUpTo<Search> {
+                            inclusive = true
+                        }
+                    }
+                },
+                onDeviceSelected = { _, _ ->
+                    navController.navigate(Home) {
+                        popUpTo<Search> {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
     }
 }
