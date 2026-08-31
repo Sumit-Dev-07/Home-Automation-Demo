@@ -12,9 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -38,22 +35,16 @@ fun LauncherScreen(
 	viewModel: HomeViewModel = hiltViewModel()
 ) {
 	val selectedDevice by viewModel.selectedDevice.collectAsState()
-	var statusText by remember { mutableStateOf("Initializing...") }
-	
-	// Simply check for selected device after a short delay
 	LaunchedEffect(Unit) {
 		delay(1.5.seconds)
 		if (selectedDevice != null) {
-			statusText = "Reconnecting to ${selectedDevice!!.name}..."
 			delay(0.5.seconds)
 			onNavigateToMain()
 		} else {
-			statusText = "Setup required..."
 			delay(0.5.seconds)
 			onNavigateToSearch()
 		}
 	}
-	
 	LauncherContent()
 }
 

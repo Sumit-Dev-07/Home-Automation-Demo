@@ -1,5 +1,9 @@
 package com.app.iot.ui.features.home.viewmodel
 
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.iot.domain.usecase.HomeUseCase
@@ -78,6 +82,36 @@ class HomeViewModel @Inject constructor(
     private val _selectedDevice = MutableStateFlow<DiscoveredDevice?>(null)
     val selectedDevice: StateFlow<DiscoveredDevice?> = _selectedDevice.asStateFlow()
 
+    private val _isWifiConnected = MutableStateFlow(false)
+    val isWifiConnectedFlow: StateFlow<Boolean> = _isWifiConnected.asStateFlow()
+
+    private val _wifiIpAddress = MutableStateFlow("0.0.0.0")
+    val wifiIpAddress: StateFlow<String> = _wifiIpAddress.asStateFlow()
+
+    private val _wifiSsid = MutableStateFlow("")
+    val wifiSsid: StateFlow<String> = _wifiSsid.asStateFlow()
+
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            _isWifiConnected.value = true
+            _wifiIpAddress.value = getWifiIpAddress()
+            _wifiSsid.value = getWifiSsid()
+            fetchStatus()
+        }
+
+        override fun onLost(network: Network) {
+            _isWifiConnected.value = false
+            _wifiIpAddress.value = "0.0.0.0"
+            _wifiSsid.value = ""
+            clearDevices()
+        }
+
+        override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+            _wifiIpAddress.value = getWifiIpAddress()
+            _wifiSsid.value = getWifiSsid()
+        }
+    }
+
     init {
         // Load persisted device
         val savedIp = appPreferences.selectedIp
@@ -85,6 +119,24 @@ class HomeViewModel @Inject constructor(
         if (savedIp.isNotEmpty()) {
             _selectedDevice.value = DiscoveredDevice(savedName, savedIp)
         }
+
+        // Start observing network
+        val connectivityManager = wifiConnectivityManager.getConnectivityManager()
+        val networkRequest = NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+        connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
+        
+        // Initial state
+        _isWifiConnected.value = isWifiConnected()
+        _wifiIpAddress.value = getWifiIpAddress()
+        _wifiSsid.value = getWifiSsid()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        wifiConnectivityManager.getConnectivityManager().unregisterNetworkCallback(networkCallback)
     }
 
     fun selectDevice(device: DiscoveredDevice) {

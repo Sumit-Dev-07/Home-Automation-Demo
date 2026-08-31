@@ -15,11 +15,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.app.auto"
+        applicationId = "com.app.iot"
         minSdk = 28
         targetSdk = 37
         versionCode = 1
-        versionName = "1.0.0"
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("Boolean", "IS_DEBUG", "false")

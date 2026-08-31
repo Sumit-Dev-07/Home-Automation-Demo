@@ -1,11 +1,6 @@
 package com.app.iot.ui.features.home.tab
 
-import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
 import android.provider.Settings
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -117,9 +112,8 @@ fun HomeTab(
 	val homeViewModel = viewModel!!
 	val context = LocalContext.current
 	val snackbarHostState = remember { SnackbarHostState() }
-	var isAppWifiConnected by remember { mutableStateOf(false) }
-	var systemIpAddress by remember { mutableStateOf("0.0.0.0") }
-	var wifiSsid by remember { mutableStateOf("") }
+	
+	val isAppWifiConnected by homeViewModel.isWifiConnectedFlow.collectAsState()
 	
 	val selectedDevice by homeViewModel.selectedDevice.collectAsState()
 	
@@ -147,50 +141,14 @@ fun HomeTab(
 				hubName,
 				if (deviceCount > 0) "$deviceCount Devices - $activeCount Active" 
 				else "Optimize your energy consumption with AI.",
-				listOf(Color(0xFF1976D2), Color(0xFF64B5F6))
+				listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF))
 			),
 			BannerData(
 				"Quick Tips",
 				"Keep your firmware updated for better security.",
-				listOf(Color(0xFF8E24AA), Color(0xFF64B5F6))
+				listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF))
 			),
 		)
-	}
-	
-	DisposableEffect(context) {
-		val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-		val networkRequest = NetworkRequest.Builder()
-			.addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-			.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-			.build()
-		
-		val networkCallback = object : ConnectivityManager.NetworkCallback() {
-			override fun onAvailable(network: Network) {
-				isAppWifiConnected = true
-				connectivityManager.bindProcessToNetwork(network)
-				systemIpAddress = homeViewModel.getWifiIpAddress()
-				wifiSsid = homeViewModel.getWifiSsid()
-			}
-			
-			override fun onLost(network: Network) {
-				isAppWifiConnected = false
-				connectivityManager.bindProcessToNetwork(null)
-				systemIpAddress = "0.0.0.0"
-				wifiSsid = ""
-				homeViewModel.clearDevices()
-			}
-			
-			override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
-				systemIpAddress = homeViewModel.getWifiIpAddress()
-				wifiSsid = homeViewModel.getWifiSsid()
-			}
-		}
-		
-		connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
-		
-		onDispose {
-			connectivityManager.unregisterNetworkCallback(networkCallback)
-		}
 	}
 	
 	Box(modifier = Modifier.fillMaxSize()) {
@@ -405,12 +363,6 @@ fun HomeTab(
 		LaunchedEffect(ledState) {
 			if (ledState is UiState.Error) {
 				snackbarHostState.showSnackbar((ledState as UiState.Error).message)
-			}
-		}
-		
-		LaunchedEffect(systemIpAddress) {
-			if (systemIpAddress != "0.0.0.0" && isAppWifiConnected) {
-				homeViewModel.fetchStatus()
 			}
 		}
 		

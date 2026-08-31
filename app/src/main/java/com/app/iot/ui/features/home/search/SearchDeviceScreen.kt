@@ -1,11 +1,6 @@
 package com.app.iot.ui.features.home.search
 
 import android.app.Activity
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -101,32 +96,6 @@ fun SearchDeviceScreen(
 	var showOpenSettings by remember { mutableStateOf(false) }
 	val discoveryState by homeViewModel.discoveryState.collectAsState()
 	val scanState by homeViewModel.scanState.collectAsState()
-
-	// Ensure local communication works by binding to Wi-Fi network
-	DisposableEffect(context) {
-		val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-		val networkRequest = NetworkRequest.Builder()
-			.addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-			.removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-			.build()
-
-		val networkCallback = object : ConnectivityManager.NetworkCallback() {
-			override fun onAvailable(network: Network) {
-				connectivityManager.bindProcessToNetwork(network)
-			}
-
-			override fun onLost(network: Network) {
-				connectivityManager.bindProcessToNetwork(null)
-			}
-		}
-
-		connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
-
-		onDispose {
-			connectivityManager.unregisterNetworkCallback(networkCallback)
-			connectivityManager.bindProcessToNetwork(null)
-		}
-	}
 
 	fun startScan() {
 		permissionMessage = null
@@ -249,7 +218,7 @@ private fun SearchDeviceContent(
 	Scaffold(
 		topBar = {
 			CommonTopAppBar(
-				title = if (showBackButton) "Search Devices" else "Setup",
+				title = if (showBackButton) "Search Devices" else "Device Setup",
 				onBackClick = if (showBackButton) onClose else null
 			)
 		},

@@ -14,6 +14,13 @@ class WifiConnectivityManager @Inject constructor(
 ) {
 
     /**
+     * Returns the ConnectivityManager instance.
+     */
+    fun getConnectivityManager(): ConnectivityManager {
+        return context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    }
+
+    /**
      * Checks if the device is currently connected to a Wi-Fi network.
      */
     fun isWifiConnected(): Boolean {
