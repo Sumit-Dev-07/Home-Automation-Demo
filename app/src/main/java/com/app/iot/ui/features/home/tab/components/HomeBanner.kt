@@ -2,13 +2,16 @@ package com.app.iot.ui.features.home.tab.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,7 +31,10 @@ import com.app.iot.ui.theme.AppPreview
 data class BannerData(
     val title: String,
     val subtitle: String,
-    val colors: List<Color>
+    val colors: List<Color>,
+    val ip: String? = null,
+    val isActive: Boolean = false,
+    val onEditClick: (() -> Unit)? = null
 )
 
 @Composable
@@ -52,7 +58,7 @@ fun HomeBannerItem(banner: BannerData) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(150.dp)
+            .height(160.dp)
             .padding(horizontal = 8.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -88,12 +94,29 @@ fun HomeBannerItem(banner: BannerData) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_devices),
                     contentDescription = null,
-                    tint = AppPalette.primary.copy(alpha = 0.2f),
+                    tint = AppPalette.primary.copy(alpha = 0.15f),
                     modifier = Modifier
                         .size(140.dp)
                         .align(Alignment.BottomEnd)
                         .offset(x = 30.dp, y = 30.dp)
                 )
+
+                // Edit Button
+                if (banner.onEditClick != null) {
+                    IconButton(
+                        onClick = banner.onEditClick,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            tint = Color.Black,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
 
                 Column(
                     modifier = Modifier
@@ -102,14 +125,43 @@ fun HomeBannerItem(banner: BannerData) {
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
-                        AppText.Bold(
-                            text = banner.title,
-                            fontSize = 20.sp,
-                            color = Color.Black
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            AppText.Bold(
+                                text = banner.title,
+                                fontSize = 20.sp,
+                                color = Color.Black
+                            )
+                            
+                            if (banner.isActive) {
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(AppPalette.green.copy(alpha = 0.15f))
+                                        .border(1.dp, AppPalette.green.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    AppText.SemiBold(
+                                        text = "Active",
+                                        fontSize = 10.sp,
+                                        color = AppPalette.darkGreen
+                                    )
+                                }
+                            }
+                        }
+                        
+                        if (!banner.ip.isNullOrEmpty()) {
+                            AppText.Medium(
+                                text = "IP: ${banner.ip}",
+                                fontSize = 12.sp,
+                                color = Color.Black.copy(alpha = 0.6f)
+                            )
+                        }
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
                         AppText.Normal(
-                            text = "2 Rooms - 4 Devices",
+                            text = banner.subtitle,
                             fontSize = 13.sp,
                             color = Color.Black.copy(alpha = 0.8f),
                             maxLines = 2

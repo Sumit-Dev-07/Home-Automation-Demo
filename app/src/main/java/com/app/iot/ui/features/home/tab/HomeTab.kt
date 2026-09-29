@@ -131,22 +131,24 @@ fun HomeTab(
 	val updateWifiState by homeViewModel.updateWifiState.collectAsState()
 	val removeDeviceState by homeViewModel.removeDeviceState.collectAsState()
 	
-	val banners = remember(selectedDevice, devices) {
+	val banners = remember(selectedDevice, devices, isAppWifiConnected) {
 		val hubName = selectedDevice?.name ?: "Smart Home"
 		val deviceCount = devices.size
 		val activeCount = devices.count { it.isOn && it.isConnected }
 		
 		listOf(
 			BannerData(
-				hubName,
-				if (deviceCount > 0) "$deviceCount Devices - $activeCount Active" 
+				title = hubName,
+				subtitle = if (deviceCount > 0) "$deviceCount Devices"
 				else "Optimize your energy consumption with AI.",
-				listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF))
+				colors = listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF)),
+				isActive = isAppWifiConnected,
+				onEditClick = { showSearchFlow = true }
 			),
 			BannerData(
-				"Quick Tips",
-				"Keep your firmware updated for better security.",
-				listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF))
+				title = "Quick Tips",
+				subtitle = "Keep your firmware updated for better security.",
+				colors = listOf(Color(0xFFFFFFFF), Color(0xFFFFFFFF))
 			),
 		)
 	}
